@@ -1,0 +1,93 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+:root {
+  --color-ivory: #fffaf0;
+  --color-ivory-soft: #f8f1e6;
+  --color-beige: #e9dcc8;
+  --color-beige-deep: #cbb89d;
+  --color-gold: #b98d4b;
+  --color-gold-soft: #d6b16f;
+  --color-ink: #2d2722;
+  --color-ink-muted: #766b60;
+  --color-line: rgba(185, 141, 75, 0.22);
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background: var(--color-ivory);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--color-ivory);
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(circle at top left, rgba(214, 177, 111, 0.2), transparent 34rem),
+    linear-gradient(180deg, var(--color-ivory) 0%, var(--color-ivory-soft) 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-family: var(--font-serif);
+  color: var(--color-ink);
+  font-weight: 600;
+  line-height: 1;
+}
+
+p {
+  margin: 0;
+}
+
+::selection {
+  color: var(--color-ink);
+  background: rgba(214, 177, 111, 0.38);
+}
+
+.section-shell {
+  width: min(1120px, calc(100% - 32px));
+  margin-inline: auto;
+  padding-block: clamp(64px, 9vw, 120px);
+}
+
+.font-serif-display {
+  font-family: var(--font-serif);
+}
