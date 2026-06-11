@@ -63,6 +63,21 @@ En **Galería** puedes:
 
 Las imágenes y videos subidos desde el equipo se guardan localmente como datos del navegador. Esto es útil para prototipo, pero no reemplaza un almacenamiento real. Para producción se recomienda conectar carga directa a Supabase Storage, Firebase Storage o un bucket propio.
 
+## Proyectar mensajes en vivo
+
+En **Mensajes en vivo** puedes:
+
+- abrir la pantalla de proyección
+- abrir el formulario público para invitados
+- activar aprobación previa
+- aprobar, ocultar o eliminar mensajes
+- cambiar cuántos segundos dura cada mensaje en pantalla
+- limpiar todos los mensajes
+
+Para la boda, abre `/pantalla-mensajes` en la laptop conectada al proyector y pon el navegador en pantalla completa. Los invitados entran a `/mensajes` para enviar su mensaje.
+
+La versión actual sincroniza mensajes usando el navegador local. Para una celebración real con invitados desde múltiples teléfonos, conecta el módulo a Supabase Realtime, Firebase Firestore o un backend con WebSockets.
+
 ## Agregar preguntas frecuentes
 
 En **Preguntas frecuentes** puedes agregar preguntas que los invitados podrían tener sobre vestimenta, parqueo, horarios, acompañantes o confirmación.

@@ -12,6 +12,8 @@ import { Hero } from './components/Hero'
 import { RSVPForm } from './components/RSVPForm'
 import { StoryTimeline } from './components/StoryTimeline'
 import { Testimonials } from './components/Testimonials'
+import { GuestMessagesPage } from './pages/GuestMessagesPage'
+import { LiveMessagesScreen } from './pages/LiveMessagesScreen'
 import { useAdminAuth } from './admin/hooks/useAdminAuth'
 import { useWeddingContent } from './hooks/useWeddingContent'
 import type { CSSProperties } from 'react'
@@ -64,6 +66,8 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<InvitationPage />} />
+      <Route path="/mensajes" element={<GuestMessagesPage />} />
+      <Route path="/pantalla-mensajes" element={<LiveMessagesScreen />} />
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/admin/*" element={<ProtectedAdminRoute />} />
       <Route path="*" element={<Navigate to="/" replace />} />

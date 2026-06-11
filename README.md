@@ -56,6 +56,30 @@ contraseña: boda2026
 
 El administrador permite editar textos, nombres, fecha, ceremonia, recepción, novios, historia, galería, video, testimonios, preguntas frecuentes, contacto, redes sociales y colores principales.
 
+## Mensajes en vivo
+
+El prototipo incluye una experiencia para proyectar mensajes durante la celebración:
+
+```text
+/mensajes
+```
+
+Formulario público para que los invitados escriban nombre, mensaje y foto opcional.
+
+```text
+/pantalla-mensajes
+```
+
+Pantalla pensada para abrir en una laptop conectada al proyector o pantalla LED.
+
+```text
+/admin/live-messages
+```
+
+Panel para moderar mensajes, abrir la pantalla de proyección, abrir el formulario, cambiar duración y activar aprobación previa.
+
+Esta versión usa `localStorage` y `BroadcastChannel`, por lo que funciona para pruebas en pestañas del mismo navegador. Para uso real con invitados desde distintos teléfonos se debe conectar a Supabase Realtime, Firebase Firestore o un backend con WebSockets.
+
 Los cambios se guardan en `localStorage` con la clave:
 
 ```text

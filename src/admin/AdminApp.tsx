@@ -13,6 +13,7 @@ import { FooterEditorPage } from './pages/FooterEditorPage'
 import { GalleryEditorPage } from './pages/GalleryEditorPage'
 import { GeneralSettingsPage } from './pages/GeneralSettingsPage'
 import { HeroEditorPage } from './pages/HeroEditorPage'
+import { LiveMessagesAdminPage } from './pages/LiveMessagesAdminPage'
 import { PreviewPage } from './pages/PreviewPage'
 import { StoryEditorPage } from './pages/StoryEditorPage'
 import { TestimonialsEditorPage } from './pages/TestimonialsEditorPage'
@@ -26,7 +27,8 @@ const pageTitles: Record<string, string> = {
   '/admin/couple': 'Los novios',
   '/admin/story': 'Nuestra historia',
   '/admin/gallery': 'Galería',
-  '/admin/testimonials': 'Mensajes',
+  '/admin/testimonials': 'Mensajes estáticos',
+  '/admin/live-messages': 'Mensajes en vivo',
   '/admin/faq': 'Preguntas frecuentes',
   '/admin/footer': 'Footer',
   '/admin/theme': 'Estilo visual',
@@ -86,6 +88,7 @@ export function AdminApp() {
           <Route path="story" element={<StoryEditorPage />} />
           <Route path="gallery" element={<GalleryEditorPage />} />
           <Route path="testimonials" element={<TestimonialsEditorPage />} />
+          <Route path="live-messages" element={<LiveMessagesAdminPage />} />
           <Route path="faq" element={<FAQEditorPage />} />
           <Route path="footer" element={<FooterEditorPage />} />
           <Route path="theme" element={<ThemeEditorPage />} />

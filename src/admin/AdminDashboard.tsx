@@ -1,4 +1,4 @@
-import { CalendarDays, ExternalLink, Image, Palette } from 'lucide-react'
+import { CalendarDays, ExternalLink, Image, MonitorUp, Palette, Send } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAdminEditor } from './hooks/useAdminEditor'
 
@@ -25,6 +25,7 @@ export function AdminDashboard() {
     { label: 'Editar portada', href: '/admin/hero', icon: Image },
     { label: 'Editar fecha', href: '/admin/general', icon: CalendarDays },
     { label: 'Editar galería', href: '/admin/gallery', icon: Image },
+    { label: 'Mensajes en vivo', href: '/admin/live-messages', icon: MonitorUp },
     { label: 'Estilo visual', href: '/admin/theme', icon: Palette },
   ]
 
@@ -63,6 +64,15 @@ export function AdminDashboard() {
               </Link>
             ))}
             <a
+              href="/mensajes"
+              target="_blank"
+              rel="noreferrer"
+              className="flex min-h-20 items-center gap-3 rounded-[8px] border border-stone-200 bg-stone-50 p-4 text-sm font-bold text-stone-800 hover:bg-[#fbf6ec]"
+            >
+              <Send className="h-5 w-5 text-[#b88a43]" />
+              Formulario de mensajes
+            </a>
+            <a
               href="/"
               target="_blank"
               rel="noreferrer"
@@ -78,7 +88,7 @@ export function AdminDashboard() {
       <section className="rounded-[8px] border border-stone-200 bg-white p-6">
         <p className="mb-4 text-sm font-bold text-stone-950">Guía rápida</p>
         <div className="grid gap-3 md:grid-cols-3">
-          {['Completa los datos generales', 'Personaliza fotos y textos', 'Revisa la vista previa'].map((step, index) => (
+          {['Completa los datos generales', 'Personaliza fotos y textos', 'Abre la pantalla de mensajes'].map((step, index) => (
             <div key={step} className="rounded-[8px] bg-[#fbf6ec] p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#b88a43]">Paso {index + 1}</p>
               <p className="mt-2 font-semibold text-stone-900">{step}</p>
@@ -89,4 +99,3 @@ export function AdminDashboard() {
     </div>
   )
 }
-

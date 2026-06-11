@@ -17,6 +17,7 @@ const leftNavItems = [
 const rightNavItems = [
   { label: 'Detalles', href: '#detalles' },
   { label: 'Preguntas', href: '#preguntas' },
+  { label: 'Mensajes', href: '/mensajes' },
   { label: 'RSVP', href: '#rsvp' },
 ]
 
@@ -46,7 +47,7 @@ export function Header({ brideName, groomName, coupleDisplayName }: HeaderProps)
           <span className="lg:hidden">{coupleDisplayName}</span>
         </a>
 
-        <nav className="hidden items-center gap-8 pl-8 text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-[#6f655d] lg:flex">
+        <nav className="hidden items-center gap-6 pl-8 text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-[#6f655d] lg:flex">
           {rightNavItems.map((item) => (
             <a key={item.href} href={item.href} className="transition-colors hover:text-[#b88a43]">
               {item.label}
