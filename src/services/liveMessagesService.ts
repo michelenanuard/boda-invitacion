@@ -1,3 +1,5 @@
+import { LIVE_MESSAGES_CONFIG } from '../config/liveMessagesConfig'
+
 export type LiveMessageStatus = 'approved' | 'pending' | 'hidden'
 
 export type LiveGuestMessage = {
@@ -21,7 +23,7 @@ const LIVE_MESSAGES_CHANNEL = 'wedding-live-messages-channel'
 
 const defaultSettings: LiveMessagesSettings = {
   moderationEnabled: false,
-  displayDurationSeconds: 28,
+  displayDurationSeconds: LIVE_MESSAGES_CONFIG.messageLifeTimeMs / 1000,
 }
 
 function createMessageId() {

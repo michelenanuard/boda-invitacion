@@ -1,12 +1,15 @@
+import { AnimatePresence, motion } from 'framer-motion'
 import { Heart } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Monogram } from '../components/Monogram'
+import { LIVE_MESSAGES_CONFIG } from '../config/liveMessagesConfig'
 import { useLiveMessages } from '../hooks/useLiveMessages'
 import { useWeddingContent } from '../hooks/useWeddingContent'
 import type { LiveGuestMessage } from '../services/liveMessagesService'
 
 type VisibleMessage = LiveGuestMessage & {
   slot: number
+  shownAt: number
   expiresAt: number
 }
 
@@ -21,41 +24,7 @@ const messageSlots = [
   'right-[9%] bottom-[8%] w-[22rem]',
 ]
 
-const sampleMessages: VisibleMessage[] = [
-  {
-    id: 'sample-1',
-    name: 'Ana & Juan',
-    message: 'Que este sea solo el comienzo de una hermosa historia juntos.',
-    photo:
-      'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=180&q=80',
-    createdAt: Date.now() - 10000,
-    status: 'approved',
-    slot: 2,
-    expiresAt: Date.now() + 600000,
-  },
-  {
-    id: 'sample-2',
-    name: 'Carla & Diego',
-    message: 'Hoy celebramos el amor más bonito. Felicidades.',
-    photo:
-      'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=180&q=80',
-    createdAt: Date.now() - 8000,
-    status: 'approved',
-    slot: 4,
-    expiresAt: Date.now() + 600000,
-  },
-  {
-    id: 'sample-3',
-    name: 'Felipe',
-    message: 'Que el amor, la paciencia y las risas nunca falten en su camino.',
-    photo:
-      'https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=180&q=80',
-    createdAt: Date.now() - 5000,
-    status: 'approved',
-    slot: 6,
-    expiresAt: Date.now() + 600000,
-  },
-]
+const displaySlotOrder = [2, 4, 6, 3, 5, 7]
 
 function getInitials(name: string) {
   return name
@@ -66,16 +35,52 @@ function getInitials(name: string) {
     .join('')
 }
 
+function MessageAvatar({ message, className }: { message: LiveGuestMessage; className: string }) {
+  return (
+    <div
+      className={`grid shrink-0 place-items-center overflow-hidden rounded-full border border-[#b88a43]/38 bg-[#f3eadb] font-serif-display font-semibold text-[#b88a43] ${className}`}
+    >
+      {message.photo ? (
+        <img src={message.photo} alt="" className="h-full w-full object-cover" />
+      ) : (
+        getInitials(message.name)
+      )}
+    </div>
+  )
+}
+
 function LiveMessageCard({ message }: { message: VisibleMessage }) {
   return (
-    <article
-      className={`live-message-card absolute hidden rounded-[8px] border border-[#d7bd83]/18 bg-[#fff8eb]/94 p-4 text-[#211b17] shadow-[0_22px_70px_rgba(0,0,0,0.24)] backdrop-blur md:block ${messageSlots[message.slot]}`}
-      style={{ animationDelay: `${message.slot * 90}ms` }}
+    <motion.article
+      layout
+      className={`absolute hidden rounded-[8px] border border-[#d7bd83]/18 bg-[#fff8eb]/94 p-4 text-[#211b17] shadow-[0_22px_70px_rgba(0,0,0,0.24)] backdrop-blur md:block ${messageSlots[message.slot]}`}
+      initial={{ opacity: 0, y: 34, scale: 0.96, filter: 'blur(10px)' }}
+      animate={{
+        opacity: 1,
+        y: [34, 0, -20],
+        scale: 1,
+        filter: 'blur(0px)',
+        transition: {
+          opacity: { duration: LIVE_MESSAGES_CONFIG.animationDuration * 0.75 },
+          y: {
+            duration: Math.max(2, (message.expiresAt - message.shownAt) / 1000),
+            times: [0, 0.08, 1],
+            ease: ['easeOut', 'linear'],
+          },
+          scale: { duration: LIVE_MESSAGES_CONFIG.animationDuration },
+          filter: { duration: LIVE_MESSAGES_CONFIG.animationDuration },
+        },
+      }}
+      exit={{
+        opacity: 0,
+        y: -58,
+        scale: 0.98,
+        filter: 'blur(8px)',
+        transition: { duration: LIVE_MESSAGES_CONFIG.animationDuration * 0.65, ease: 'easeIn' },
+      }}
     >
       <div className="flex gap-4">
-        <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-full border border-[#b88a43]/38 bg-[#f3eadb] font-serif-display text-2xl font-semibold text-[#b88a43]">
-          {message.photo ? <img src={message.photo} alt="" className="h-full w-full object-cover" /> : getInitials(message.name)}
-        </div>
+        <MessageAvatar message={message} className="h-16 w-16 text-2xl" />
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
             <h2 className="font-serif-display text-2xl font-semibold leading-none text-[#9c6f2d]">
@@ -86,26 +91,34 @@ function LiveMessageCard({ message }: { message: VisibleMessage }) {
           <p className="mt-2 text-sm leading-6 text-[#211b17]">{message.message}</p>
         </div>
       </div>
-    </article>
+    </motion.article>
   )
 }
 
 function MobileMessageStack({ messages }: { messages: VisibleMessage[] }) {
   return (
     <div className="mx-auto mt-10 grid w-full max-w-md gap-4 md:hidden">
-      {messages.slice(0, 4).map((message) => (
-        <div key={message.id} className="rounded-[8px] border border-[#d7bd83]/18 bg-[#fff8eb]/94 p-4 text-[#211b17]">
-          <div className="flex gap-4">
-            <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-full border border-[#b88a43]/38 bg-[#f3eadb] font-serif-display text-xl font-semibold text-[#b88a43]">
-              {message.photo ? <img src={message.photo} alt="" className="h-full w-full object-cover" /> : getInitials(message.name)}
+      <AnimatePresence initial={false}>
+        {messages.slice(0, LIVE_MESSAGES_CONFIG.maxVisibleMessages).map((message) => (
+          <motion.div
+            layout
+            key={message.id}
+            className="rounded-[8px] border border-[#d7bd83]/18 bg-[#fff8eb]/94 p-4 text-[#211b17]"
+            initial={{ opacity: 0, y: 26, scale: 0.97 }}
+            animate={{ opacity: 1, y: -12, scale: 1 }}
+            exit={{ opacity: 0, y: -42, scale: 0.98 }}
+            transition={{ duration: LIVE_MESSAGES_CONFIG.animationDuration, ease: 'easeOut' }}
+          >
+            <div className="flex gap-4">
+              <MessageAvatar message={message} className="h-14 w-14 text-xl" />
+              <div>
+                <p className="font-serif-display text-xl font-semibold text-[#9c6f2d]">{message.name}</p>
+                <p className="mt-1 text-sm leading-6">{message.message}</p>
+              </div>
             </div>
-            <div>
-              <p className="font-serif-display text-xl font-semibold text-[#9c6f2d]">{message.name}</p>
-              <p className="mt-1 text-sm leading-6">{message.message}</p>
-            </div>
-          </div>
-        </div>
-      ))}
+          </motion.div>
+        ))}
+      </AnimatePresence>
     </div>
   )
 }
@@ -114,6 +127,11 @@ export function LiveMessagesScreen() {
   const { content } = useWeddingContent()
   const { messages, settings } = useLiveMessages()
   const [visibleMessages, setVisibleMessages] = useState<VisibleMessage[]>([])
+  const [hasProjectedMessages, setHasProjectedMessages] = useState(false)
+  const queuedMessages = useRef<LiveGuestMessage[]>([])
+  const queuedMessageIds = useRef(new Set<string>())
+  const projectedMessageIds = useRef(new Set<string>())
+  const nextSlotIndex = useRef(0)
 
   const approvedMessages = useMemo(
     () => messages.filter((message) => message.status === 'approved').sort((a, b) => a.createdAt - b.createdAt),
@@ -121,34 +139,65 @@ export function LiveMessagesScreen() {
   )
 
   useEffect(() => {
-    const updateTimer = window.setTimeout(() => {
-      setVisibleMessages((currentMessages) => {
-        const currentIds = new Set(currentMessages.map((message) => message.id))
-        const nextMessages = approvedMessages
-          .filter((message) => !currentIds.has(message.id))
-          .map((message, index) => ({
-            ...message,
-            slot: (currentMessages.length + index) % messageSlots.length,
-            expiresAt: Date.now() + settings.displayDurationSeconds * 1000,
-          }))
+    const newMessages = approvedMessages.filter(
+      (message) => !projectedMessageIds.current.has(message.id) && !queuedMessageIds.current.has(message.id),
+    )
 
-        return [...currentMessages, ...nextMessages].slice(-messageSlots.length)
-      })
-    }, 0)
-
-    return () => window.clearTimeout(updateTimer)
-  }, [approvedMessages, settings.displayDurationSeconds])
+    newMessages.forEach((message) => {
+      queuedMessages.current.push(message)
+      queuedMessageIds.current.add(message.id)
+    })
+  }, [approvedMessages])
 
   useEffect(() => {
-    const interval = window.setInterval(() => {
+    const queueInterval = window.setInterval(() => {
+      setVisibleMessages((currentMessages) => {
+        const now = Date.now()
+        const activeMessages = currentMessages.filter((message) => message.expiresAt > now)
+        const availableSlots = LIVE_MESSAGES_CONFIG.maxVisibleMessages - activeMessages.length
+
+        if (availableSlots <= 0 || queuedMessages.current.length === 0) {
+          return activeMessages
+        }
+
+        const nextMessages = queuedMessages.current.splice(0, availableSlots).map((message) => {
+          queuedMessageIds.current.delete(message.id)
+          projectedMessageIds.current.add(message.id)
+
+          const slot = displaySlotOrder[nextSlotIndex.current % displaySlotOrder.length]
+          nextSlotIndex.current += 1
+
+          return {
+            ...message,
+            slot,
+            shownAt: now,
+            expiresAt: now + settings.displayDurationSeconds * 1000,
+          }
+        })
+
+        if (nextMessages.length > 0) {
+          setHasProjectedMessages(true)
+        }
+
+        return [...activeMessages, ...nextMessages]
+      })
+    }, LIVE_MESSAGES_CONFIG.queueIntervalMs)
+
+    return () => window.clearInterval(queueInterval)
+  }, [settings.displayDurationSeconds])
+
+  useEffect(() => {
+    const cleanupInterval = window.setInterval(() => {
       const now = Date.now()
       setVisibleMessages((currentMessages) => currentMessages.filter((message) => message.expiresAt > now))
-    }, 1000)
+    }, 500)
 
-    return () => window.clearInterval(interval)
+    return () => window.clearInterval(cleanupInterval)
   }, [])
 
-  const messagesToShow = visibleMessages.length > 0 ? visibleMessages : sampleMessages
+  const hasRealMessages = approvedMessages.length > 0 || hasProjectedMessages
+  const messagesToShow = visibleMessages.length > 0 ? visibleMessages : []
+  const showEmptyState = !hasRealMessages && messagesToShow.length === 0
 
   return (
     <main className="relative h-screen overflow-hidden bg-[#100d0a] px-5 py-7 text-[#fffdf8] sm:px-8">
@@ -176,12 +225,24 @@ export function LiveMessagesScreen() {
         </p>
 
         <div className="relative mt-4 hidden min-h-[57vh] w-full md:block">
-          {messagesToShow.map((message) => (
-            <LiveMessageCard key={message.id} message={message} />
-          ))}
+          <AnimatePresence initial={false}>
+            {messagesToShow.map((message) => (
+              <LiveMessageCard key={message.id} message={message} />
+            ))}
+          </AnimatePresence>
+          {showEmptyState ? (
+            <p className="absolute inset-x-0 top-1/2 mx-auto max-w-xl -translate-y-1/2 text-center font-serif-display text-3xl font-semibold text-[#fffdf8]/62">
+              Sé el primero en dejar un mensaje para los novios
+            </p>
+          ) : null}
         </div>
 
         <MobileMessageStack messages={messagesToShow} />
+        {showEmptyState ? (
+          <p className="mx-auto mt-10 max-w-md text-center font-serif-display text-2xl font-semibold text-[#fffdf8]/62 md:hidden">
+            Sé el primero en dejar un mensaje para los novios
+          </p>
+        ) : null}
 
         <div className="relative mt-auto flex flex-col items-center gap-3 pb-3 text-center">
           <p className="text-sm uppercase tracking-[0.24em] text-[#d7bd83]">

@@ -7,6 +7,7 @@ import {
   type LiveGuestMessage,
   type LiveMessagesSettings,
 } from '../services/liveMessagesService'
+import { LIVE_MESSAGES_CONFIG } from '../config/liveMessagesConfig'
 
 export function useLiveMessages() {
   const [messages, setMessages] = useState<LiveGuestMessage[]>(() => getLiveMessages())
@@ -18,7 +19,13 @@ export function useLiveMessages() {
       setSettings(getLiveMessagesSettings())
     }
 
-    return subscribeToLiveMessages(refresh)
+    const unsubscribe = subscribeToLiveMessages(refresh)
+    const pollingInterval = window.setInterval(refresh, LIVE_MESSAGES_CONFIG.pollingFallbackMs)
+
+    return () => {
+      unsubscribe()
+      window.clearInterval(pollingInterval)
+    }
   }, [])
 
   const saveSettings = (nextSettings: LiveMessagesSettings) => {

@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Monogram } from '../components/Monogram'
 import { useWeddingContent } from '../hooks/useWeddingContent'
-import { submitLiveMessage } from '../services/liveMessagesService'
+import { saveGuestMessage } from '../services/guestMessagesService'
 
 const MAX_MESSAGE_LENGTH = 200
 
@@ -37,7 +37,7 @@ export function GuestMessagesPage() {
       return
     }
 
-    const nextMessage = submitLiveMessage({ name, message, photo: photo || undefined })
+    const nextMessage = saveGuestMessage({ name, message, photo: photo || undefined })
     setName('')
     setMessage('')
     setPhoto('')
