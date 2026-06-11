@@ -70,6 +70,20 @@ export function Footer({ data }: FooterProps) {
               </a>
             ))}
           </div>
+          {data.socialLinks.length > 0 ? (
+            <div className="mt-8">
+              <h3 className="text-sm font-semibold uppercase tracking-[0.24em] text-[#d7bd83]">
+                Redes
+              </h3>
+              <div className="mt-4 grid gap-3 text-sm text-[#d8cdbf]">
+                {data.socialLinks.map((link) => (
+                  <a key={link.id} className="transition hover:text-white" href={link.url} target="_blank" rel="noreferrer">
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </nav>
       </div>
     </footer>

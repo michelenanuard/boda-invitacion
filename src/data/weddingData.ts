@@ -54,24 +54,32 @@ export const weddingData: WeddingData = {
       title: 'Primer encuentro',
       description:
         'Una tarde tranquila, una mesa compartida y una conversación que ninguno de los dos quiso terminar.',
+      image:
+        'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=900&q=85',
     },
     {
       year: '2021',
       title: 'Primera cita',
       description:
         'Cena, risas y la certeza de haber encontrado a alguien con quien todo se sentía natural.',
+      image:
+        'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=900&q=85',
     },
     {
       year: '2025',
       title: 'La propuesta',
       description:
         'Bajo luces cálidas y con la familia cerca, llegó la pregunta que cambió el rumbo de nuestra historia.',
+      image:
+        'https://images.unsplash.com/photo-1513278974582-3e1b4a4fa21e?auto=format&fit=crop&w=900&q=85',
     },
     {
       year: '2026',
       title: 'El gran día',
       description:
         'Celebraremos el amor, la familia y el inicio de una nueva vida juntos.',
+      image:
+        'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=900&q=85',
     },
   ],
   gallery: [
@@ -197,6 +205,11 @@ export const weddingData: WeddingData = {
     phone: '+1 809 555 0184',
     location: 'Santo Domingo, República Dominicana',
   },
+  socialLinks: [
+    { id: 'instagram', label: 'Instagram', url: 'https://instagram.com/' },
+    { id: 'facebook', label: 'Facebook', url: 'https://facebook.com/' },
+    { id: 'pinterest', label: 'Pinterest', url: 'https://pinterest.com/' },
+  ],
   theme: {
     ivory: '#fbf6ec',
     paper: '#fffdf8',
@@ -206,5 +219,7 @@ export const weddingData: WeddingData = {
     muted: '#6f655d',
   },
 }
+
+export const defaultWeddingContent = weddingData
 
 export default weddingData

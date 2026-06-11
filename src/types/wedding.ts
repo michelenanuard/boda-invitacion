@@ -7,6 +7,12 @@ export type WeddingTheme = {
   muted: string
 }
 
+export type SocialLink = {
+  id: string
+  label: string
+  url: string
+}
+
 export type WeddingEvent = {
   title: string
   time: string
@@ -29,6 +35,7 @@ export type StoryEvent = {
   year: string
   title: string
   description: string
+  image?: string
 }
 
 export type GalleryImage = {
@@ -98,5 +105,8 @@ export type WeddingData = {
   faq: FAQItem[]
   rsvp: RSVPContent
   contact: WeddingContact
+  socialLinks: SocialLink[]
   theme: WeddingTheme
 }
+
+export type WeddingContent = WeddingData

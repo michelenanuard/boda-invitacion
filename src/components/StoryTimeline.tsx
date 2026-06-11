@@ -35,6 +35,13 @@ export function StoryTimeline({ story }: StoryTimelineProps) {
                       isEven ? 'md:mr-10 md:text-right' : 'md:ml-10'
                     }`}
                   >
+                    {event.image ? (
+                      <img
+                        src={event.image}
+                        alt={event.title}
+                        className="mb-5 aspect-[4/3] w-full rounded-[8px] object-cover shadow-[0_18px_50px_rgba(33,27,23,0.10)]"
+                      />
+                    ) : null}
                     <p className="text-xs font-semibold uppercase tracking-[0.26em] text-[#b88a43]">
                       {event.year}
                     </p>

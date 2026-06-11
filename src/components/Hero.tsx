@@ -56,16 +56,16 @@ export function Hero({ data }: HeroProps) {
               </p>
             </div>
 
-            <div className="reveal-soft luxury-card relative mx-auto w-full max-w-md overflow-hidden rounded-[8px] p-6 text-center text-[#211b17] sm:p-8 lg:mr-0">
+            <div className="reveal-soft luxury-card relative mx-auto flex w-full max-w-md flex-col items-center overflow-hidden rounded-[8px] p-6 text-center text-[#211b17] sm:p-8 lg:mr-0">
               <div className="absolute inset-x-5 top-5 h-px bg-gradient-to-r from-transparent via-[#b88a43]/45 to-transparent" />
               <Monogram brideName={data.brideName} groomName={data.groomName} className="mx-auto h-16 w-16 text-[0.72rem]" />
               <p className="mt-6 text-xs font-semibold uppercase tracking-[0.28em] text-[#b88a43]">
                 Invitación formal
               </p>
-              <p className="mx-auto mt-4 max-w-xs font-serif-display text-3xl font-semibold leading-tight text-[#211b17] sm:text-4xl">
+              <p className="mx-auto mt-4 max-w-[17.5rem] text-center font-serif-display text-2xl font-semibold leading-tight text-[#211b17] sm:max-w-[20rem] sm:text-4xl">
                 Te esperamos para celebrar nuestro inicio.
               </p>
-              <div className="my-7 h-px bg-[#b88a43]/20" />
+              <div className="my-7 h-px w-full bg-[#b88a43]/20" />
               <p className="flex flex-wrap items-center justify-center gap-3 text-center text-xs font-semibold uppercase leading-6 tracking-[0.14em] text-[#394136] sm:text-sm sm:tracking-[0.18em]">
                 <Calendar className="h-4 w-4 text-[#b88a43]" aria-hidden="true" />
                 {formattedDate}

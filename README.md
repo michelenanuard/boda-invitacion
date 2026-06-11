@@ -1,15 +1,15 @@
 # Landing de boda
 
-Proyecto de landing page para una invitacion de boda, creado con React, TypeScript y Vite. Incluye secciones para presentar la boda, lugares, galeria, textos informativos, FAQ, testimonios y RSVP.
+Proyecto de landing page para una invitación de boda, creado con React, TypeScript y Vite. Incluye secciones para presentar la boda, lugares, galería, textos informativos, FAQ, testimonios y RSVP.
 
 ## Requisitos
 
 - Node.js instalado.
 - npm instalado.
 
-Se recomienda usar una version actual de Node.js compatible con Vite.
+Se recomienda usar una versión actual de Node.js compatible con Vite.
 
-## Instalacion
+## Instalación
 
 Instala las dependencias del proyecto:
 
@@ -27,7 +27,46 @@ npm run dev
 
 Abre la URL que muestre la terminal, normalmente `http://localhost:5173`.
 
-## Compilar para produccion
+## Administrador
+
+La invitación pública vive en:
+
+```text
+/
+```
+
+El panel administrador vive en:
+
+```text
+/admin
+```
+
+Pantalla de acceso:
+
+```text
+/admin/login
+```
+
+Credenciales temporales de desarrollo:
+
+```text
+usuario: admin
+contraseña: boda2026
+```
+
+El administrador permite editar textos, nombres, fecha, ceremonia, recepción, novios, historia, galería, video, testimonios, preguntas frecuentes, contacto, redes sociales y colores principales.
+
+Los cambios se guardan en `localStorage` con la clave:
+
+```text
+wedding-invitation-content
+```
+
+Si no hay cambios guardados, la web carga los datos por defecto desde `src/data/weddingData.ts`.
+
+Importante: la autenticación y el guardado en `localStorage` son temporales. Antes de producción se debe conectar un backend real como Supabase, Firebase, Netlify Functions/Blobs o una API propia.
+
+## Compilar para producción
 
 Genera los archivos finales:
 
@@ -35,11 +74,11 @@ Genera los archivos finales:
 npm run build
 ```
 
-La compilacion queda en la carpeta `dist`.
+La compilación queda en la carpeta `dist`.
 
 ## Previsualizar la compilacion
 
-Despues de compilar, revisa localmente la version de produccion:
+Después de compilar, revisa localmente la versión de producción:
 
 ```bash
 npm run preview
@@ -53,18 +92,28 @@ La data principal de la boda vive en:
 src/data/weddingData.ts
 ```
 
-Edita ese archivo para cambiar nombres, fecha, hora, lugares, textos, galeria, preguntas frecuentes, testimonios, RSVP y enlaces de mapas.
+Edita ese archivo para cambiar nombres, fecha, hora, lugares, textos, galería, preguntas frecuentes, testimonios, RSVP y enlaces de mapas.
+
+También puedes hacerlo desde `/admin` sin tocar código. El archivo `src/data/weddingData.ts` queda como contenido por defecto y respaldo inicial.
 
 El RSVP tambien tiene una plantilla HTML oculta en `index.html` para que Netlify Forms pueda detectarlo al publicar.
 
-## Cambiar imagenes
+## Cambiar imágenes
 
-Usa imagenes optimizadas para web y reemplaza o agrega los archivos en las carpetas de assets del proyecto, por ejemplo:
+Usa imágenes optimizadas para web. Desde `/admin` puedes pegar una URL o subir una imagen desde el equipo para portada, galería, video e historia.
 
-- `src/assets/` para imagenes importadas desde componentes.
-- `public/` para archivos publicos referenciados por ruta directa.
+En esta versión, las imágenes subidas desde el equipo se guardan como datos locales en `localStorage`. Funciona para prototipo y revisión, pero para producción conviene usar almacenamiento real.
 
-Luego actualiza las referencias correspondientes en el codigo o en `src/data/weddingData.ts`, segun como este configurada cada imagen.
+Opciones recomendadas para producción:
+
+- Supabase Storage
+- Firebase Storage
+- Netlify Blobs/Functions
+- Un bucket propio conectado a una API
+
+## Cambiar video
+
+En `/admin/galeria` puedes pegar un enlace compartido de Google Drive, una URL directa MP4 o subir un archivo de video desde el equipo. Los videos subidos localmente pueden ocupar demasiado espacio en `localStorage`; para producción se recomienda almacenamiento externo.
 
 ## Deploy en Netlify
 

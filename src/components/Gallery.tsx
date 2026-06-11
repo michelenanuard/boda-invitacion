@@ -40,13 +40,30 @@ function GalleryTile({
   )
 }
 
+function getDriveVideoEmbedUrl(url: string) {
+  const fileMatch = url.match(/\/file\/d\/([^/]+)/)
+  const idMatch = url.match(/[?&]id=([^&]+)/)
+  const videoId = fileMatch?.[1] ?? idMatch?.[1]
+
+  return videoId ? `https://drive.google.com/file/d/${videoId}/preview` : ''
+}
+
 function VideoFeature({ video }: { video: GalleryVideo }) {
   const hasVideo = Boolean(video.src?.trim())
+  const driveEmbedUrl = hasVideo ? getDriveVideoEmbedUrl(video.src ?? '') : ''
 
   return (
     <figure className="luxury-card order-first overflow-hidden rounded-[8px] p-3 md:order-none md:min-h-[560px]">
       <div className="group relative h-full min-h-[420px] overflow-hidden rounded-[8px] bg-[#211b17] md:min-h-full">
-        {hasVideo ? (
+        {driveEmbedUrl ? (
+          <iframe
+            className="h-full w-full"
+            src={driveEmbedUrl}
+            title={video.title}
+            allow="autoplay; fullscreen"
+            allowFullScreen
+          />
+        ) : hasVideo ? (
           <video
             className="h-full w-full object-cover"
             controls
@@ -62,13 +79,17 @@ function VideoFeature({ video }: { video: GalleryVideo }) {
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
         )}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#211b17]/72 via-[#211b17]/12 to-transparent" />
-        <div className="pointer-events-none absolute inset-0 grid place-items-center">
-          <span className="grid h-20 w-20 place-items-center rounded-full border border-white/45 bg-white/16 text-white shadow-[0_18px_60px_rgba(0,0,0,0.28)] backdrop-blur transition-transform duration-300 group-hover:scale-105">
-            <Play className="ml-1 h-8 w-8 fill-white" aria-hidden="true" />
-          </span>
-        </div>
-        <figcaption className="absolute inset-x-0 bottom-0 p-5 text-center text-white sm:p-7">
+        {!hasVideo ? (
+          <>
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#211b17]/72 via-[#211b17]/12 to-transparent" />
+            <div className="pointer-events-none absolute inset-0 grid place-items-center">
+              <span className="grid h-20 w-20 place-items-center rounded-full border border-white/45 bg-white/16 text-white shadow-[0_18px_60px_rgba(0,0,0,0.28)] backdrop-blur transition-transform duration-300 group-hover:scale-105">
+                <Play className="ml-1 h-8 w-8 fill-white" aria-hidden="true" />
+              </span>
+            </div>
+          </>
+        ) : null}
+        <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 p-5 text-center text-white sm:p-7">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#d7bd83]">
             {video.title}
           </p>
