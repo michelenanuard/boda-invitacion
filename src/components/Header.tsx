@@ -1,59 +1,62 @@
-import { Heart, Menu, X } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { useState } from 'react'
+import { Monogram } from './Monogram'
 
 interface HeaderProps {
+  brideName: string
+  groomName: string
   coupleDisplayName: string
 }
 
-const navItems = [
+const leftNavItems = [
   { label: 'Inicio', href: '#inicio' },
-  { label: 'Nuestra Historia', href: '#historia' },
+  { label: 'Historia', href: '#historia' },
   { label: 'Galería', href: '#galeria' },
+]
+
+const rightNavItems = [
+  { label: 'Detalles', href: '#detalles' },
   { label: 'Preguntas', href: '#preguntas' },
   { label: 'RSVP', href: '#rsvp' },
 ]
 
-export function Header({ coupleDisplayName }: HeaderProps) {
+export function Header({ brideName, groomName, coupleDisplayName }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const navItems = [...leftNavItems, ...rightNavItems]
 
   const closeMenu = () => setIsOpen(false)
 
   return (
-    <header className="sticky top-0 z-50 border-b border-stone-200/70 bg-white/75 shadow-sm shadow-stone-950/5 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
-        <a
-          href="#inicio"
-          className="inline-flex items-center gap-2 font-serif-display text-xl text-stone-900 no-underline"
-          onClick={closeMenu}
-        >
-          <Heart className="h-5 w-5 fill-rose-200 text-rose-400" aria-hidden="true" />
-          <span>{coupleDisplayName}</span>
-        </a>
-
-        <nav className="hidden items-center gap-8 text-sm font-medium text-stone-700 lg:flex">
-          {navItems.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="transition-colors hover:text-rose-700"
-            >
+    <header className="sticky top-0 z-50 border-b border-[#b88a43]/12 bg-[#fffdf8]/88 shadow-[0_10px_38px_rgba(33,27,23,0.045)] backdrop-blur-xl">
+      <div className="mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center px-5 py-3 sm:px-8">
+        <nav className="hidden items-center justify-end gap-8 pr-8 text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-[#6f655d] lg:flex">
+          {leftNavItems.map((item) => (
+            <a key={item.href} href={item.href} className="transition-colors hover:text-[#b88a43]">
               {item.label}
             </a>
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 lg:flex">
-          <a
-            href="#rsvp"
-            className="inline-flex items-center justify-center rounded-full bg-stone-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-rose-800"
-          >
-            Confirmar Asistencia
-          </a>
-        </div>
+        <a
+          href="#inicio"
+          className="inline-flex items-center gap-3 font-serif-display text-xl leading-none text-[#211b17] no-underline lg:justify-center"
+          onClick={closeMenu}
+        >
+          <Monogram brideName={brideName} groomName={groomName} className="h-12 w-12 text-[0.62rem]" />
+          <span className="lg:hidden">{coupleDisplayName}</span>
+        </a>
+
+        <nav className="hidden items-center gap-8 pl-8 text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-[#6f655d] lg:flex">
+          {rightNavItems.map((item) => (
+            <a key={item.href} href={item.href} className="transition-colors hover:text-[#b88a43]">
+              {item.label}
+            </a>
+          ))}
+        </nav>
 
         <button
           type="button"
-          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-stone-200 bg-white/85 text-stone-900 shadow-sm lg:hidden"
+          className="col-start-3 ml-auto inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#b88a43]/20 bg-[#fffdf8]/85 text-[#211b17] shadow-sm lg:hidden"
           aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
           aria-expanded={isOpen}
           aria-controls="mobile-navigation"
@@ -66,27 +69,19 @@ export function Header({ coupleDisplayName }: HeaderProps) {
       {isOpen ? (
         <div
           id="mobile-navigation"
-          className="border-t border-stone-200/80 bg-white/95 px-5 py-5 shadow-lg shadow-stone-950/5 backdrop-blur-xl lg:hidden"
+          className="border-t border-[#b88a43]/15 bg-[#fffdf8]/96 px-5 py-5 shadow-lg shadow-stone-950/5 backdrop-blur-xl lg:hidden"
         >
           <nav className="mx-auto flex max-w-7xl flex-col gap-2">
             {navItems.map((item) => (
               <a
                 key={item.href}
                 href={item.href}
-                className="rounded-md px-3 py-3 text-left text-base font-medium text-stone-800 transition-colors hover:bg-rose-50 hover:text-rose-800"
+                className="rounded-md px-3 py-3 text-left text-base font-medium text-[#394136] transition-colors hover:bg-[#f3eadb] hover:text-[#b88a43]"
                 onClick={closeMenu}
               >
                 {item.label}
               </a>
             ))}
-            <a
-              href="#rsvp"
-              className="mt-2 inline-flex items-center justify-center gap-2 rounded-full bg-stone-900 px-5 py-3 text-sm font-semibold text-white shadow-sm"
-              onClick={closeMenu}
-            >
-              <Heart className="h-4 w-4" aria-hidden="true" />
-              Confirmar Asistencia
-            </a>
           </nav>
         </div>
       ) : null}

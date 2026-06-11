@@ -18,15 +18,15 @@ export function SectionTitle({
   align = 'center',
 }: SectionTitleProps) {
   return (
-    <div className={`mb-12 max-w-3xl ${alignClassName[align]}`}>
-      <p className="mb-3 text-xs font-semibold uppercase tracking-[0.28em] text-[#b8925d]">
+    <div className={`mb-12 max-w-3xl ${alignClassName[align]} md:mb-16`}>
+      <p className="mb-4 text-xs font-semibold uppercase tracking-[0.32em] text-[#b88a43]">
         {eyebrow}
       </p>
-      <h2 className="font-serif-display text-4xl font-semibold leading-tight text-[#211b17] md:text-5xl">
+      <h2 className="font-serif-display text-[clamp(2.35rem,11vw,4.8rem)] font-semibold leading-[0.96] text-[#211b17]">
         {title}
       </h2>
       {description ? (
-        <p className="mt-4 text-base leading-8 text-[#776b61] md:text-lg">
+        <p className="mt-5 text-base leading-8 text-[#6f655d] md:text-lg">
           {description}
         </p>
       ) : null}

@@ -13,15 +13,19 @@ import { weddingData } from './data/weddingData'
 
 function App() {
   return (
-    <div className="min-h-screen overflow-x-hidden">
-      <Header coupleDisplayName={weddingData.coupleDisplayName} />
+    <div className="min-h-screen overflow-x-hidden bg-[#fbf6ec] text-[#211b17]">
+      <Header
+        brideName={weddingData.brideName}
+        groomName={weddingData.groomName}
+        coupleDisplayName={weddingData.coupleDisplayName}
+      />
       <main>
         <Hero data={weddingData} />
         <EventDetails ceremony={weddingData.ceremony} reception={weddingData.reception} />
         <Countdown weddingDate={weddingData.weddingDate} weddingTime={weddingData.weddingTime} />
         <Couple bride={weddingData.bride} groom={weddingData.groom} />
         <StoryTimeline story={weddingData.story} />
-        <Gallery images={weddingData.gallery} />
+        <Gallery images={weddingData.gallery} video={weddingData.galleryVideo} />
         <Testimonials testimonials={weddingData.testimonials} />
         <RSVPForm content={weddingData.rsvp} />
         <FAQ items={weddingData.faq} />

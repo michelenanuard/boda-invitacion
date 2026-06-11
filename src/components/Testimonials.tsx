@@ -8,7 +8,7 @@ type TestimonialsProps = {
 
 export function Testimonials({ testimonials }: TestimonialsProps) {
   return (
-    <section id="mensajes" className="section-shell py-20 md:py-24">
+    <section id="mensajes" className="section-shell">
       <SectionTitle
         eyebrow="Mensajes"
         title="Palabras de quienes nos acompañan"
@@ -19,15 +19,15 @@ export function Testimonials({ testimonials }: TestimonialsProps) {
         {testimonials.slice(0, 3).map((testimonial) => (
           <article
             key={`${testimonial.name}-${testimonial.relation}`}
-            className="rounded-[8px] border border-[#e7d8c2] bg-[#fffdf8]/85 p-7 text-left shadow-[0_20px_70px_rgba(33,27,23,0.08)]"
+            className="luxury-card rounded-[8px] p-7 text-left md:p-8"
           >
-            <Quote className="text-[#b8925d]" size={28} aria-hidden="true" />
+            <Quote className="text-[#b88a43]" size={28} aria-hidden="true" />
             <p className="mt-5 leading-8 text-[#211b17]">{testimonial.message}</p>
-            <div className="mt-7 border-t border-[#e7d8c2] pt-5">
+            <div className="mt-7 border-t border-[#b88a43]/20 pt-5">
               <p className="font-serif-display text-2xl font-semibold text-[#211b17]">
                 {testimonial.name}
               </p>
-              <p className="mt-1 text-sm font-semibold uppercase tracking-[0.18em] text-[#b8925d]">
+              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#b88a43]">
                 {testimonial.relation}
               </p>
             </div>

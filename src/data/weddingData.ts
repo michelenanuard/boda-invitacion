@@ -124,6 +124,13 @@ export const weddingData: WeddingData = {
       caption: 'Nuestro primer baile',
     },
   ],
+  galleryVideo: {
+    title: 'Nuestro video',
+    caption: 'Un instante para revivir la emoción de este capítulo.',
+    poster:
+      'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=85',
+    src: '',
+  },
   testimonials: [
     {
       message:
@@ -191,12 +198,12 @@ export const weddingData: WeddingData = {
     location: 'Santo Domingo, República Dominicana',
   },
   theme: {
-    ivory: '#fffaf0',
+    ivory: '#fbf6ec',
     paper: '#fffdf8',
-    linen: '#e9dcc8',
-    gold: '#b98d4b',
-    ink: '#2d2722',
-    muted: '#766b60',
+    linen: '#f3eadb',
+    gold: '#b88a43',
+    ink: '#211b17',
+    muted: '#6f655d',
   },
 }
 

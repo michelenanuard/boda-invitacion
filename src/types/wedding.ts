@@ -38,6 +38,13 @@ export type GalleryImage = {
   caption: string
 }
 
+export type GalleryVideo = {
+  title: string
+  caption: string
+  poster: string
+  src?: string
+}
+
 export type Testimonial = {
   message: string
   name: string
@@ -86,6 +93,7 @@ export type WeddingData = {
   groom: PersonProfile
   story: StoryEvent[]
   gallery: GalleryImage[]
+  galleryVideo: GalleryVideo
   testimonials: Testimonial[]
   faq: FAQItem[]
   rsvp: RSVPContent

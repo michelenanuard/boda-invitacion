@@ -1,4 +1,4 @@
-import { Clock } from 'lucide-react'
+import { CalendarHeart } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
 interface CountdownProps {
@@ -44,26 +44,35 @@ export function Countdown({ weddingDate, weddingTime }: CountdownProps) {
   ]
 
   return (
-    <section className="bg-stone-50 px-5 py-16 sm:px-8">
-      <div className="mx-auto max-w-5xl text-center">
-        <p className="mb-4 inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.2em] text-rose-700">
-          <Clock className="h-4 w-4" aria-hidden="true" />
-          Cuenta regresiva
-        </p>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {units.map((unit) => (
-            <div
-              key={unit.label}
-              className="rounded-md border border-stone-200 bg-white px-4 py-6 shadow-sm shadow-stone-950/5"
-            >
-              <div className="font-serif-display text-4xl font-semibold text-stone-950 sm:text-5xl">
-                {String(unit.value).padStart(2, '0')}
+    <section className="paper-texture border-y border-[#b88a43]/14 px-5 py-16 text-[#211b17] sm:px-8 md:py-20">
+      <div className="mx-auto max-w-6xl">
+        <div className="luxury-card grid items-center gap-9 rounded-[8px] p-6 md:grid-cols-[0.78fr_1.22fr] md:p-10">
+          <div className="text-center md:text-left">
+            <p className="mb-4 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.32em] text-[#b88a43]">
+              <CalendarHeart className="h-4 w-4" aria-hidden="true" />
+              Save the date
+            </p>
+            <h2 className="font-serif-display text-5xl font-semibold leading-[0.95] text-[#211b17] md:text-6xl">
+              Falta poco para brindar juntos
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {units.map((unit) => (
+              <div
+                key={unit.label}
+                className="relative overflow-hidden rounded-[8px] border border-[#b88a43]/22 bg-[#fffdf8]/72 px-3 py-6 text-center sm:px-4"
+              >
+                <div className="absolute inset-x-4 top-0 h-px bg-[#b88a43]/50" />
+                <div className="font-serif-display text-5xl font-semibold leading-none text-[#211b17] sm:text-6xl">
+                  {String(unit.value).padStart(2, '0')}
+                </div>
+                <div className="mt-3 text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-[#b88a43]">
+                  {unit.label}
+                </div>
               </div>
-              <div className="mt-2 text-sm font-medium uppercase tracking-[0.18em] text-stone-500">
-                {unit.label}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </section>

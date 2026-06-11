@@ -7,31 +7,37 @@ type EventDetailsProps = {
   reception: WeddingEvent
 }
 
-function EventCard({ event }: { event: WeddingEvent }) {
+function EventCard({ event, index }: { event: WeddingEvent; index: number }) {
   return (
-    <article className="group rounded-[8px] border border-[#e7d8c2] bg-[#fffdf8]/85 p-7 text-left shadow-[0_24px_80px_rgba(33,27,23,0.08)] backdrop-blur transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_90px_rgba(33,27,23,0.12)] md:p-8">
-      <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#fbf1df] text-[#b8925d] ring-1 ring-[#e7d8c2]">
-        <CalendarHeart size={22} aria-hidden="true" />
+    <article className="luxury-card group relative overflow-hidden rounded-[8px] p-7 text-left transition duration-300 hover:-translate-y-1 hover:shadow-[0_34px_100px_rgba(33,27,23,0.13)] md:p-9">
+      <div className="absolute right-6 top-5 font-serif-display text-7xl font-semibold leading-none text-[#b88a43]/10">
+        0{index + 1}
+      </div>
+      <div className="mb-7 inline-flex h-14 w-14 items-center justify-center rounded-full border border-[#b88a43]/20 bg-[#f3eadb] text-[#b88a43]">
+        <CalendarHeart size={24} aria-hidden="true" />
       </div>
 
-      <h3 className="font-serif-display text-3xl font-semibold text-[#211b17]">
+      <h3 className="font-serif-display text-4xl font-semibold text-[#211b17]">
         {event.title}
       </h3>
 
-      <div className="mt-6 space-y-4 text-[#776b61]">
-        <p className="flex items-center gap-3">
-          <Clock className="shrink-0 text-[#b8925d]" size={18} aria-hidden="true" />
+      <div className="mt-7 space-y-4 text-[#6f655d]">
+        <p className="flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.16em] text-[#394136]">
+          <Clock className="shrink-0 text-[#b88a43]" size={18} aria-hidden="true" />
           <span>{event.time}</span>
         </p>
-        <p className="font-semibold text-[#211b17]">{event.venue}</p>
+        <p className="font-serif-display text-2xl font-semibold leading-tight text-[#211b17]">
+          {event.venue}
+        </p>
         <p className="flex items-start gap-3 leading-7">
-          <MapPin className="mt-1 shrink-0 text-[#b8925d]" size={18} aria-hidden="true" />
+          <MapPin className="mt-1 shrink-0 text-[#b88a43]" size={18} aria-hidden="true" />
           <span>{event.address}</span>
         </p>
+        {event.note ? <p className="border-l border-[#b88a43]/35 pl-4 leading-7">{event.note}</p> : null}
       </div>
 
       <a
-        className="mt-8 inline-flex items-center justify-center gap-2 rounded-full border border-[#b8925d] px-5 py-3 text-sm font-semibold text-[#211b17] transition hover:bg-[#b8925d] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#b8925d] focus:ring-offset-2 focus:ring-offset-[#fffdf8]"
+        className="mt-8 inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#b88a43] px-5 py-3 text-sm font-semibold text-[#211b17] transition hover:bg-[#b88a43] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#b88a43] focus:ring-offset-2 focus:ring-offset-[#fffdf8]"
         href={event.mapUrl}
         target="_blank"
         rel="noreferrer"
@@ -45,16 +51,18 @@ function EventCard({ event }: { event: WeddingEvent }) {
 
 export function EventDetails({ ceremony, reception }: EventDetailsProps) {
   return (
-    <section id="detalles" className="section-shell py-20 md:py-24">
-      <SectionTitle
-        eyebrow="Celebración"
-        title="Ceremonia y recepción"
-        description="Cada momento importante reunido en un itinerario claro para acompañar la celebración."
-      />
+    <section id="detalles" className="section-band">
+      <div className="section-shell">
+        <SectionTitle
+          eyebrow="Celebración"
+          title="Ceremonia y recepción"
+          description="Un itinerario sobrio y claro para que cada invitado llegue con calma a los momentos principales."
+        />
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <EventCard event={ceremony} />
-        <EventCard event={reception} />
+        <div className="grid gap-6 md:grid-cols-2 lg:gap-8">
+          <EventCard event={ceremony} index={0} />
+          <EventCard event={reception} index={1} />
+        </div>
       </div>
     </section>
   )
