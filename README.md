@@ -120,6 +120,13 @@ Edita ese archivo para cambiar nombres, fecha, hora, lugares, textos, galería, 
 
 También puedes hacerlo desde `/admin` sin tocar código. El archivo `src/data/weddingData.ts` queda como contenido por defecto y respaldo inicial.
 
+Si quieres que los cambios hechos en `/admin` queden dentro del build de Netlify, exporta el respaldo desde **Datos generales** y aplícalo antes de compilar:
+
+```bash
+npm run content:apply -- respaldo-invitacion-boda.json
+npm run build
+```
+
 El RSVP tambien tiene una plantilla HTML oculta en `index.html` para que Netlify Forms pueda detectarlo al publicar.
 
 ## Cambiar imágenes

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "content:apply": "node scripts/apply-wedding-content.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },

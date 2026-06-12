@@ -92,6 +92,15 @@ En **Datos generales** estan las opciones:
 
 Antes de restaurar, el sistema pide confirmación.
 
+Para publicar en Netlify los cambios hechos desde el admin, exporta el respaldo y aplícalo al contenido base antes de compilar:
+
+```bash
+npm run content:apply -- respaldo-invitacion-boda.json
+npm run build
+```
+
+Después sube nuevamente la carpeta `dist`.
+
 ## Como se guardan los cambios
 
 Esta primera version guarda todo en el navegador usando `localStorage` con la clave:

@@ -1,66 +1,121 @@
-# Deploy en Netlify
+# Deploy en Netlify desde VS Code
 
-Guia rapida para publicar la landing de boda usando Netlify Drop.
+Guia para publicar cambios del proyecto en el sitio existente:
 
-## 1. Compilar el proyecto
+```text
+https://transcendent-bunny-1dd924.netlify.app
+```
 
-Desde la raiz del proyecto ejecuta:
+## 1. Instalar Netlify CLI
+
+Ejecuta una vez:
+
+```bash
+npm install -g netlify-cli
+```
+
+Verifica la instalacion:
+
+```bash
+netlify --version
+```
+
+## 2. Iniciar sesion
+
+```bash
+netlify login
+```
+
+Se abrira el navegador para autorizar la cuenta de Netlify.
+
+## 3. Vincular este proyecto al sitio existente
+
+Desde la raiz del proyecto:
+
+```bash
+netlify link
+```
+
+Cuando Netlify pregunte que sitio usar, selecciona el sitio existente:
+
+```text
+transcendent-bunny-1dd924
+```
+
+Esto crea la carpeta local `.netlify/` con la vinculacion del sitio. No es necesario subir esa carpeta manualmente.
+
+## 4. Compilar
 
 ```bash
 npm run build
 ```
 
-Esto genera la carpeta:
+El build de Vite genera la carpeta:
 
 ```text
 dist
 ```
 
-Esa es la carpeta que se publica.
+## 5. Publicar un deploy preview
 
-## 2. Subir a Netlify Drop
-
-1. Abre Netlify Drop: `https://app.netlify.com/drop`.
-2. Arrastra la carpeta `dist` al area de subida.
-3. Espera a que Netlify termine el deploy.
-4. Revisa la URL temporal que Netlify genera.
-
-No subas `src`, `node_modules` ni el proyecto completo. Para este flujo manual, sube solo `dist`.
-
-## 3. Netlify Forms
-
-Si el RSVP usa Netlify Forms, el formulario debe estar incluido en el HTML final y tener atributos compatibles con Netlify:
-
-```html
-<form name="rsvp" method="POST" data-netlify="true">
-  <input type="hidden" name="form-name" value="rsvp" />
-</form>
+```bash
+netlify deploy --dir=dist
 ```
 
-Notas importantes:
+Netlify mostrara una URL de preview. Revisala antes de publicar en produccion.
 
-- `data-netlify="true"` permite que Netlify detecte el formulario.
-- `name` identifica el formulario en Netlify.
-- El campo oculto `form-name` debe coincidir con el nombre del formulario.
-- Como esta app renderiza React en el cliente, `index.html` incluye un formulario oculto `rsvp` con los mismos nombres de campos del formulario visible.
-- El formulario visible envia los datos en formato `application/x-www-form-urlencoded`, compatible con Netlify Forms para envios desde JavaScript.
-- Si hay mas de un formulario, cada uno debe tener un `name` diferente.
-- Despues del deploy, revisa las submissions desde el panel de Netlify.
+## 6. Publicar en produccion
 
-## 4. Dominio personalizado
+```bash
+netlify deploy --prod --dir=dist
+```
 
-Cuando la landing ya este revisada:
+Al terminar, revisa:
 
-1. Entra al sitio dentro del panel de Netlify.
-2. Ve a la seccion de dominios.
-3. Agrega el dominio personalizado.
-4. Sigue las instrucciones DNS que indique Netlify.
-5. Espera la propagacion y verifica HTTPS.
+```text
+https://transcendent-bunny-1dd924.netlify.app
+```
 
-## 5. Actualizar el sitio
+## 7. Rutas a probar despues del deploy
 
-Cada vez que cambies contenido:
+Abre estas rutas directamente y refresca cada una:
 
-1. Ejecuta `npm run build`.
-2. Sube de nuevo la carpeta `dist` a Netlify Drop.
-3. Revisa la URL publicada.
+```text
+/
+/admin
+/admin/login
+/mensajes
+/rsvp
+/cualquier-ruta-interna
+```
+
+## Configuracion incluida
+
+El archivo `netlify.toml` define:
+
+```toml
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+```
+
+Tambien existe `public/_redirects` con:
+
+```text
+/*    /index.html   200
+```
+
+Ambas reglas apuntan al mismo fallback de React Router y no se contradicen.
+
+## Confirmar que el deploy fue exitoso
+
+1. La terminal debe mostrar que el deploy finalizo sin errores.
+2. Para produccion, Netlify debe indicar que publico con `--prod`.
+3. La URL `https://transcendent-bunny-1dd924.netlify.app` debe cargar la invitacion actualizada.
+4. Las rutas internas deben abrir directo sin 404.
+5. En Netlify, el panel del sitio debe mostrar el deploy mas reciente como publicado.

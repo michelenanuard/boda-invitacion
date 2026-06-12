@@ -1,6 +1,4 @@
-import type { WeddingData } from '../types/wedding'
-
-export const weddingData: WeddingData = {
+{
   "brideName": "Ana Kary",
   "groomName": "Marcos",
   "coupleDisplayName": "Ana Kary & Marcos",
@@ -212,7 +210,3 @@ export const weddingData: WeddingData = {
     "muted": "#6f655d"
   }
 }
-
-export const defaultWeddingContent = weddingData
-
-export default weddingData
