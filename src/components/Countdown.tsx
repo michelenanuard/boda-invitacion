@@ -44,15 +44,15 @@ export function Countdown({ weddingDate, weddingTime }: CountdownProps) {
   ]
 
   return (
-    <section className="paper-texture border-y border-[#b88a43]/14 px-5 py-16 text-[#211b17] sm:px-8 md:py-20">
+    <section className="paper-texture border-y border-[#b88a43]/14 px-4 py-14 text-[#211b17] sm:px-6 sm:py-16 md:px-8 md:py-20">
       <div className="mx-auto max-w-6xl">
-        <div className="luxury-card grid items-center gap-9 rounded-[8px] p-6 md:grid-cols-[0.78fr_1.22fr] md:p-10">
+        <div className="luxury-card grid items-center gap-7 rounded-[8px] p-5 sm:gap-9 sm:p-6 md:grid-cols-[0.78fr_1.22fr] md:p-10">
           <div className="text-center md:text-left">
-            <p className="mb-4 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.32em] text-[#b88a43]">
+            <p className="mb-4 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#b88a43] sm:tracking-[0.32em]">
               <CalendarHeart className="h-4 w-4" aria-hidden="true" />
               Save the date
             </p>
-            <h2 className="font-serif-display text-5xl font-semibold leading-[0.95] text-[#211b17] md:text-6xl">
+            <h2 className="font-serif-display text-[2.6rem] font-semibold leading-[0.95] text-[#211b17] sm:text-5xl md:text-6xl">
               Falta poco para brindar juntos
             </h2>
           </div>
@@ -61,13 +61,13 @@ export function Countdown({ weddingDate, weddingTime }: CountdownProps) {
             {units.map((unit) => (
               <div
                 key={unit.label}
-                className="relative overflow-hidden rounded-[8px] border border-[#b88a43]/22 bg-[#fffdf8]/72 px-3 py-6 text-center sm:px-4"
+                className="relative overflow-hidden rounded-[8px] border border-[#b88a43]/22 bg-[#fffdf8]/72 px-2 py-5 text-center sm:px-4 sm:py-6"
               >
                 <div className="absolute inset-x-4 top-0 h-px bg-[#b88a43]/50" />
-                <div className="font-serif-display text-5xl font-semibold leading-none text-[#211b17] sm:text-6xl">
+                <div className="font-serif-display text-4xl font-semibold leading-none text-[#211b17] sm:text-5xl lg:text-6xl">
                   {String(unit.value).padStart(2, '0')}
                 </div>
-                <div className="mt-3 text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-[#b88a43]">
+                <div className="mt-3 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#b88a43] sm:text-[0.72rem] sm:tracking-[0.22em]">
                   {unit.label}
                 </div>
               </div>

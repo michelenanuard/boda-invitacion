@@ -20,10 +20,23 @@ export function useLiveMessages() {
     }
 
     const unsubscribe = subscribeToLiveMessages(refresh)
+    refresh()
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        refresh()
+      }
+    }
+
+    window.addEventListener('focus', refresh)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
     const pollingInterval = window.setInterval(refresh, LIVE_MESSAGES_CONFIG.pollingFallbackMs)
 
     return () => {
       unsubscribe()
+      window.removeEventListener('focus', refresh)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
       window.clearInterval(pollingInterval)
     }
   }, [])

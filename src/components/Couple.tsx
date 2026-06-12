@@ -16,16 +16,16 @@ function ProfileCard({ person }: { person: PersonProfile }) {
           alt={person.name}
         />
       </div>
-      <div className="p-7 md:p-9">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.26em] text-[#b88a43]">
+      <div className="p-5 sm:p-7 md:p-9">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#b88a43] sm:tracking-[0.26em]">
           {person.roleLabel}
         </p>
-        <h3 className="font-serif-display text-4xl font-semibold leading-tight text-[#211b17] md:text-5xl">
+        <h3 className="break-words font-serif-display text-3xl font-semibold leading-tight text-[#211b17] sm:text-4xl md:text-5xl">
           {person.name}
         </h3>
-        <p className="mt-5 leading-8 text-[#6f655d]">{person.description}</p>
+        <p className="mt-5 leading-7 text-[#6f655d] sm:leading-8">{person.description}</p>
         {person.parents ? (
-          <p className="mt-6 border-t border-[#b88a43]/20 pt-5 text-xs font-semibold uppercase tracking-[0.18em] text-[#b88a43]">
+          <p className="mt-6 break-words border-t border-[#b88a43]/20 pt-5 text-xs font-semibold uppercase tracking-[0.14em] text-[#b88a43] sm:tracking-[0.18em]">
             {person.parents}
           </p>
         ) : null}

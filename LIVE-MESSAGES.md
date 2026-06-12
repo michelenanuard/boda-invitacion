@@ -1,4 +1,4 @@
-# Mensajes en vivo
+# Mensajes en Vivo
 
 La experiencia de mensajes en vivo tiene tres rutas:
 
@@ -6,7 +6,7 @@ La experiencia de mensajes en vivo tiene tres rutas:
 - `/pantalla-mensajes`: pantalla para proyección.
 - `/admin/live-messages`: configuración y moderación.
 
-## Almacenamiento actual
+## Almacenamiento Actual
 
 Los mensajes se guardan temporalmente en `localStorage` con el servicio `src/services/liveMessagesService.ts`.
 
@@ -21,7 +21,7 @@ Cada mensaje tiene:
 - `createdAt`
 - `status`
 
-## Actualización sin refrescar
+## Actualización Sin Refrescar
 
 El servicio emite un evento custom cuando se guarda un mensaje y escucha:
 
@@ -53,17 +53,32 @@ Edita `src/config/liveMessagesConfig.ts`:
 ```ts
 LIVE_MESSAGES_CONFIG = {
   maxVisibleMessages: 4,
-  messageLifeTimeMs: 12000,
-  entranceDelayMs: 600,
-  pollingFallbackMs: 3000,
+  messageLifeTimeMs: 9000,
+  entranceDelayMs: 350,
+  pollingFallbackMs: 2500,
   queueIntervalMs: 900,
-  animationDuration: 0.8,
+  animationDuration: 0.55,
+  exitAnimationDuration: 0.45,
+  verticalTravelDuration: 8,
 }
 ```
 
-El tiempo de permanencia también puede cambiarse desde `/admin/live-messages` en segundos.
+## Ajustes Recomendados Para Proyector
 
-## Cómo probar
+- Permanencia base: 8.5 a 9 segundos para mensajes cortos.
+- Mensajes medianos: 10 segundos.
+- Mensajes largos: 12 segundos.
+- Entrada: 0.45 a 0.65 segundos.
+- Salida: 0.35 a 0.55 segundos.
+- Cantidad máxima visible: 4 mensajes.
+
+Para hacer la animación más rápida, baja `messageLifeTimeMs`, `verticalTravelDuration` o `animationDuration`.
+
+Para hacerla más lenta y ceremonial, sube `messageLifeTimeMs` o `verticalTravelDuration`.
+
+El tiempo de lectura se controla principalmente desde `messageLifeTimeMs` y la función `getMessageLifeTime()` en `src/config/liveMessagesConfig.ts`.
+
+## Cómo Probar
 
 1. Abre `/pantalla-mensajes` en una pestaña.
 2. Abre `/mensajes` en otra pestaña.

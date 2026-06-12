@@ -49,9 +49,19 @@ function getChannel() {
 function notifyLiveMessages() {
   window.dispatchEvent(new CustomEvent(LIVE_MESSAGES_UPDATED_EVENT))
 
+  try {
+    window.dispatchEvent(new StorageEvent('storage', { key: LIVE_MESSAGES_STORAGE_KEY }))
+  } catch {
+    // Some browsers restrict synthetic StorageEvent construction; the custom event above still covers this tab.
+  }
+
   const channel = getChannel()
-  channel?.postMessage({ type: LIVE_MESSAGES_UPDATED_EVENT })
-  channel?.close()
+
+  try {
+    channel?.postMessage({ type: LIVE_MESSAGES_UPDATED_EVENT, sentAt: Date.now() })
+  } finally {
+    channel?.close()
+  }
 }
 
 export function getLiveMessages(): LiveGuestMessage[] {

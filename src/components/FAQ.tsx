@@ -14,10 +14,10 @@ export function FAQ({ items }: FAQProps) {
   const [openItem, setOpenItem] = useState<string | null>(() => (items[0] ? getItemKey(items[0], 0) : null))
 
   return (
-    <section id="preguntas" className="bg-[#fffdf8] px-5 py-20 sm:px-8 md:py-28">
+    <section id="preguntas" className="bg-[#fffdf8] px-4 py-16 sm:px-6 sm:py-20 md:px-8 md:py-28">
       <div className="mx-auto max-w-4xl">
         <div className="text-center">
-          <p className="mb-4 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.32em] text-[#b88a43]">
+          <p className="mb-4 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.26em] text-[#b88a43] sm:tracking-[0.32em]">
             <HelpCircle className="h-4 w-4" aria-hidden="true" />
             Preguntas
           </p>
@@ -26,7 +26,7 @@ export function FAQ({ items }: FAQProps) {
           </h2>
         </div>
 
-        <div className="luxury-card mt-12 divide-y divide-[#b88a43]/16 overflow-hidden rounded-[8px]">
+        <div className="luxury-card mt-10 divide-y divide-[#b88a43]/16 overflow-hidden rounded-[8px] sm:mt-12">
           {items.map((item, index) => {
             const itemKey = getItemKey(item, index)
             const isOpen = openItem === itemKey
@@ -35,11 +35,11 @@ export function FAQ({ items }: FAQProps) {
               <div key={itemKey}>
                 <button
                   type="button"
-                  className="flex w-full items-center justify-between gap-4 px-5 py-5 text-left text-base font-semibold text-[#211b17] sm:px-7"
+                  className="flex min-h-14 w-full items-center justify-between gap-4 px-4 py-4 text-left text-base font-semibold text-[#211b17] sm:px-7 sm:py-5"
                   aria-expanded={isOpen}
                   onClick={() => setOpenItem(isOpen ? null : itemKey)}
                 >
-                  <span>{item.question}</span>
+                  <span className="min-w-0 break-words">{item.question}</span>
                   <ChevronDown
                     className={`h-5 w-5 flex-none text-[#b88a43] transition-transform ${
                       isOpen ? 'rotate-180' : ''
@@ -48,7 +48,7 @@ export function FAQ({ items }: FAQProps) {
                   />
                 </button>
                 {isOpen ? (
-                  <div className="px-5 pb-6 text-sm leading-7 text-[#6f655d] sm:px-7 sm:text-base">
+                  <div className="break-words px-4 pb-6 text-sm leading-7 text-[#6f655d] sm:px-7 sm:text-base">
                     {item.answer}
                   </div>
                 ) : null}

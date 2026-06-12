@@ -19,7 +19,7 @@ function GalleryTile({
   return (
     <button
       type="button"
-      className={`group relative min-h-48 overflow-hidden rounded-[8px] bg-[#f3eadb] text-left shadow-[0_18px_60px_rgba(33,27,23,0.08)] ring-1 ring-[#b88a43]/10 ${className}`}
+      className={`group relative min-h-48 overflow-hidden rounded-[8px] bg-[#f3eadb] text-left shadow-[0_18px_60px_rgba(33,27,23,0.08)] ring-1 ring-[#b88a43]/10 focus:outline-none focus:ring-2 focus:ring-[#b88a43] focus:ring-offset-2 focus:ring-offset-[#fbf6ec] ${className}`}
       onClick={() => onSelect(image)}
     >
       <img
@@ -28,11 +28,11 @@ function GalleryTile({
         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
       />
       <span className="absolute inset-0 bg-gradient-to-t from-[#211b17]/72 via-[#211b17]/10 to-transparent opacity-80 transition-opacity group-hover:opacity-95" />
-      <span className="absolute right-4 top-4 grid h-10 w-10 translate-y-2 place-items-center rounded-full border border-white/35 bg-white/14 text-white opacity-0 backdrop-blur transition duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+      <span className="absolute right-3 top-3 grid h-11 w-11 place-items-center rounded-full border border-white/35 bg-white/14 text-white opacity-100 backdrop-blur transition duration-300 group-hover:scale-105 sm:right-4 sm:top-4 sm:translate-y-2 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100">
         <ZoomIn className="h-4 w-4" aria-hidden="true" />
       </span>
       {image.caption ? (
-        <span className="absolute inset-x-0 bottom-0 p-4 font-serif-display text-xl font-semibold leading-tight text-white sm:p-5 sm:text-2xl">
+        <span className="absolute inset-x-0 bottom-0 break-words p-4 font-serif-display text-xl font-semibold leading-tight text-white sm:p-5 sm:text-2xl">
           {image.caption}
         </span>
       ) : null}
@@ -54,7 +54,7 @@ function VideoFeature({ video }: { video: GalleryVideo }) {
 
   return (
     <figure className="luxury-card order-first overflow-hidden rounded-[8px] p-3 md:order-none md:min-h-[560px]">
-      <div className="group relative h-full min-h-[420px] overflow-hidden rounded-[8px] bg-[#211b17] md:min-h-full">
+      <div className="group relative h-full min-h-[360px] overflow-hidden rounded-[8px] bg-[#211b17] sm:min-h-[420px] md:min-h-full">
         {driveEmbedUrl ? (
           <iframe
             className="h-full w-full"
@@ -93,7 +93,7 @@ function VideoFeature({ video }: { video: GalleryVideo }) {
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#d7bd83]">
             {video.title}
           </p>
-          <p className="mx-auto mt-3 max-w-sm font-serif-display text-2xl font-semibold leading-tight sm:text-3xl">
+          <p className="mx-auto mt-3 max-w-sm break-words font-serif-display text-2xl font-semibold leading-tight sm:text-3xl">
             {video.caption}
           </p>
         </figcaption>
@@ -126,7 +126,7 @@ export function Gallery({ images, video }: GalleryProps) {
   }, [selectedImage])
 
   return (
-    <section id="galeria" className="bg-[#fbf6ec] px-5 py-20 sm:px-8 md:py-28">
+    <section id="galeria" className="bg-[#fbf6ec] px-4 py-16 sm:px-6 sm:py-20 md:px-8 md:py-28">
       <div className="mx-auto max-w-7xl">
         <div className="mx-auto max-w-3xl text-center">
           <p className="mb-4 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.32em] text-[#b88a43]">
@@ -138,7 +138,7 @@ export function Gallery({ images, video }: GalleryProps) {
           </h2>
         </div>
 
-        <div className="mt-12 grid gap-4 md:grid-cols-[0.72fr_1.2fr_0.72fr] md:items-stretch">
+        <div className="mt-10 grid gap-4 sm:mt-12 md:grid-cols-[0.72fr_1.2fr_0.72fr] md:items-stretch">
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-1">
             {featuredImages.slice(0, 2).map((image) => (
               <GalleryTile key={image.id ?? image.src} image={image} onSelect={setSelectedImage} />
@@ -155,7 +155,7 @@ export function Gallery({ images, video }: GalleryProps) {
         </div>
 
         {remainingImages.length > 0 ? (
-          <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
             {remainingImages.map((image) => (
               <GalleryTile
                 key={image.id ?? image.src}
@@ -170,14 +170,14 @@ export function Gallery({ images, video }: GalleryProps) {
 
       {selectedImage ? (
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-[#211b17]/88 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto bg-[#211b17]/88 p-4 backdrop-blur-sm sm:p-6"
           role="dialog"
           aria-modal="true"
           aria-label={selectedImage.alt}
           onClick={() => setSelectedImage(null)}
         >
           <div
-            className="relative max-h-[90svh] w-full max-w-5xl"
+            className="relative w-full max-w-5xl"
             onClick={(event) => event.stopPropagation()}
           >
             <button
@@ -192,10 +192,10 @@ export function Gallery({ images, video }: GalleryProps) {
             <img
               src={selectedImage.src}
               alt={selectedImage.alt}
-              className="max-h-[84svh] w-full rounded-[8px] object-contain"
+              className="max-h-[78svh] w-full rounded-[8px] object-contain sm:max-h-[84svh]"
             />
             {selectedImage.caption ? (
-              <p className="mt-3 text-center font-serif-display text-2xl font-semibold text-white">
+              <p className="mt-3 break-words text-center font-serif-display text-xl font-semibold text-white sm:text-2xl">
                 {selectedImage.caption}
               </p>
             ) : null}

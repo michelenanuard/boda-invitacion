@@ -29,7 +29,7 @@ export function Header({ brideName, groomName, coupleDisplayName }: HeaderProps)
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#b88a43]/12 bg-[#fffdf8]/88 shadow-[0_10px_38px_rgba(33,27,23,0.045)] backdrop-blur-xl">
-      <div className="mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center px-5 py-3 sm:px-8">
+      <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:px-6 lg:grid-cols-[1fr_auto_1fr] lg:px-8">
         <nav className="hidden items-center justify-end gap-8 pr-8 text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-[#6f655d] lg:flex">
           {leftNavItems.map((item) => (
             <a key={item.href} href={item.href} className="transition-colors hover:text-[#b88a43]">
@@ -40,11 +40,11 @@ export function Header({ brideName, groomName, coupleDisplayName }: HeaderProps)
 
         <a
           href="#inicio"
-          className="inline-flex items-center gap-3 font-serif-display text-xl leading-none text-[#211b17] no-underline lg:justify-center"
+          className="inline-flex min-w-0 items-center gap-3 font-serif-display text-lg leading-none text-[#211b17] no-underline sm:text-xl lg:justify-center"
           onClick={closeMenu}
         >
           <Monogram brideName={brideName} groomName={groomName} className="h-12 w-12 text-[0.62rem]" />
-          <span className="lg:hidden">{coupleDisplayName}</span>
+          <span className="min-w-0 truncate lg:hidden">{coupleDisplayName}</span>
         </a>
 
         <nav className="hidden items-center gap-6 pl-8 text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-[#6f655d] lg:flex">
@@ -57,7 +57,7 @@ export function Header({ brideName, groomName, coupleDisplayName }: HeaderProps)
 
         <button
           type="button"
-          className="col-start-3 ml-auto inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#b88a43]/20 bg-[#fffdf8]/85 text-[#211b17] shadow-sm lg:hidden"
+          className="ml-auto inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#b88a43]/20 bg-[#fffdf8]/85 text-[#211b17] shadow-sm lg:col-start-3 lg:hidden"
           aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
           aria-expanded={isOpen}
           aria-controls="mobile-navigation"
@@ -70,14 +70,14 @@ export function Header({ brideName, groomName, coupleDisplayName }: HeaderProps)
       {isOpen ? (
         <div
           id="mobile-navigation"
-          className="border-t border-[#b88a43]/15 bg-[#fffdf8]/96 px-5 py-5 shadow-lg shadow-stone-950/5 backdrop-blur-xl lg:hidden"
+          className="border-t border-[#b88a43]/15 bg-[#fffdf8]/96 px-4 py-4 shadow-lg shadow-stone-950/5 backdrop-blur-xl sm:px-6 lg:hidden"
         >
           <nav className="mx-auto flex max-w-7xl flex-col gap-2">
             {navItems.map((item) => (
               <a
                 key={item.href}
                 href={item.href}
-                className="rounded-md px-3 py-3 text-left text-base font-medium text-[#394136] transition-colors hover:bg-[#f3eadb] hover:text-[#b88a43]"
+                className="flex min-h-11 items-center rounded-md px-3 py-3 text-left text-base font-medium text-[#394136] transition-colors hover:bg-[#f3eadb] hover:text-[#b88a43]"
                 onClick={closeMenu}
               >
                 {item.label}

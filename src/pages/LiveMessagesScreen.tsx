@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Heart } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Monogram } from '../components/Monogram'
-import { LIVE_MESSAGES_CONFIG } from '../config/liveMessagesConfig'
+import { getMessageLifeTime, LIVE_MESSAGES_CONFIG } from '../config/liveMessagesConfig'
 import { useLiveMessages } from '../hooks/useLiveMessages'
 import { useWeddingContent } from '../hooks/useWeddingContent'
 import type { LiveGuestMessage } from '../services/liveMessagesService'
@@ -63,7 +63,10 @@ function LiveMessageCard({ message }: { message: VisibleMessage }) {
         transition: {
           opacity: { duration: LIVE_MESSAGES_CONFIG.animationDuration * 0.75 },
           y: {
-            duration: Math.max(2, (message.expiresAt - message.shownAt) / 1000),
+            duration: Math.min(
+              LIVE_MESSAGES_CONFIG.verticalTravelDuration,
+              Math.max(2, (message.expiresAt - message.shownAt) / 1000),
+            ),
             times: [0, 0.08, 1],
             ease: ['easeOut', 'linear'],
           },
@@ -76,7 +79,7 @@ function LiveMessageCard({ message }: { message: VisibleMessage }) {
         y: -58,
         scale: 0.98,
         filter: 'blur(8px)',
-        transition: { duration: LIVE_MESSAGES_CONFIG.animationDuration * 0.65, ease: 'easeIn' },
+        transition: { duration: LIVE_MESSAGES_CONFIG.exitAnimationDuration, ease: 'easeIn' },
       }}
     >
       <div className="flex gap-4">
@@ -97,13 +100,13 @@ function LiveMessageCard({ message }: { message: VisibleMessage }) {
 
 function MobileMessageStack({ messages }: { messages: VisibleMessage[] }) {
   return (
-    <div className="mx-auto mt-10 grid w-full max-w-md gap-4 md:hidden">
+    <div className="mx-auto mt-8 grid w-full max-w-md gap-4 md:hidden">
       <AnimatePresence initial={false}>
         {messages.slice(0, LIVE_MESSAGES_CONFIG.maxVisibleMessages).map((message) => (
           <motion.div
             layout
             key={message.id}
-            className="rounded-[8px] border border-[#d7bd83]/18 bg-[#fff8eb]/94 p-4 text-[#211b17]"
+            className="min-w-0 rounded-[8px] border border-[#d7bd83]/18 bg-[#fff8eb]/94 p-4 text-[#211b17]"
             initial={{ opacity: 0, y: 26, scale: 0.97 }}
             animate={{ opacity: 1, y: -12, scale: 1 }}
             exit={{ opacity: 0, y: -42, scale: 0.98 }}
@@ -111,9 +114,9 @@ function MobileMessageStack({ messages }: { messages: VisibleMessage[] }) {
           >
             <div className="flex gap-4">
               <MessageAvatar message={message} className="h-14 w-14 text-xl" />
-              <div>
-                <p className="font-serif-display text-xl font-semibold text-[#9c6f2d]">{message.name}</p>
-                <p className="mt-1 text-sm leading-6">{message.message}</p>
+              <div className="min-w-0">
+                <p className="break-words font-serif-display text-xl font-semibold text-[#9c6f2d]">{message.name}</p>
+                <p className="mt-1 break-words text-sm leading-6">{message.message}</p>
               </div>
             </div>
           </motion.div>
@@ -125,7 +128,7 @@ function MobileMessageStack({ messages }: { messages: VisibleMessage[] }) {
 
 export function LiveMessagesScreen() {
   const { content } = useWeddingContent()
-  const { messages, settings } = useLiveMessages()
+  const { messages } = useLiveMessages()
   const [visibleMessages, setVisibleMessages] = useState<VisibleMessage[]>([])
   const [hasProjectedMessages, setHasProjectedMessages] = useState(false)
   const queuedMessages = useRef<LiveGuestMessage[]>([])
@@ -171,7 +174,7 @@ export function LiveMessagesScreen() {
             ...message,
             slot,
             shownAt: now,
-            expiresAt: now + settings.displayDurationSeconds * 1000,
+            expiresAt: now + getMessageLifeTime(message.message),
           }
         })
 
@@ -184,7 +187,7 @@ export function LiveMessagesScreen() {
     }, LIVE_MESSAGES_CONFIG.queueIntervalMs)
 
     return () => window.clearInterval(queueInterval)
-  }, [settings.displayDurationSeconds])
+  }, [])
 
   useEffect(() => {
     const cleanupInterval = window.setInterval(() => {
@@ -200,27 +203,27 @@ export function LiveMessagesScreen() {
   const showEmptyState = !hasRealMessages && messagesToShow.length === 0
 
   return (
-    <main className="relative h-screen overflow-hidden bg-[#100d0a] px-5 py-7 text-[#fffdf8] sm:px-8">
+    <main className="relative min-h-screen overflow-x-hidden bg-[#100d0a] px-4 py-5 text-[#fffdf8] sm:px-6 sm:py-7 md:h-screen md:overflow-hidden md:px-8">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(184,138,67,0.18),transparent_20rem),radial-gradient(circle_at_76%_30%,rgba(255,253,248,0.08),transparent_24rem),radial-gradient(circle_at_84%_82%,rgba(184,138,67,0.16),transparent_20rem)]" />
       <div className="pointer-events-none absolute inset-0 opacity-[0.18] [background-image:radial-gradient(circle,rgba(215,189,131,.62)_1px,transparent_1px)] [background-size:90px_90px]" />
       <div className="pointer-events-none absolute -left-20 bottom-0 h-72 w-72 rounded-full border border-[#b88a43]/22" />
       <div className="pointer-events-none absolute -right-24 top-16 h-80 w-80 rounded-full border border-[#b88a43]/16" />
 
-      <section className="relative z-10 mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-7xl flex-col items-center">
+      <section className="relative z-10 mx-auto flex min-h-[calc(100svh-2.5rem)] max-w-7xl flex-col items-center md:min-h-[calc(100vh-3.5rem)]">
         <Monogram
           brideName={content.brideName}
           groomName={content.groomName}
-          className="h-24 w-24 bg-transparent text-[1rem]"
+          className="h-[4.5rem] w-[4.5rem] bg-transparent text-[0.78rem] sm:h-24 sm:w-24 sm:text-[1rem]"
         />
-        <h1 className="mt-5 text-center font-serif-display text-[clamp(3rem,7vw,5.8rem)] font-semibold leading-[0.92]">
+        <h1 className="mt-5 break-words text-center font-serif-display text-[clamp(2.65rem,13vw,5.8rem)] font-semibold leading-[0.95] md:leading-[0.92]">
           <span className="text-[#d7bd83]">Mensajes</span> para los novios
         </h1>
-        <div className="mt-5 flex items-center gap-5 text-[#d7bd83]">
-          <span className="h-px w-20 bg-[#b88a43]" />
+        <div className="mt-5 flex items-center gap-4 text-[#d7bd83] sm:gap-5">
+          <span className="h-px w-14 bg-[#b88a43] sm:w-20" />
           <Heart className="h-6 w-6" aria-hidden="true" />
-          <span className="h-px w-20 bg-[#b88a43]" />
+          <span className="h-px w-14 bg-[#b88a43] sm:w-20" />
         </div>
-        <p className="mt-5 text-center text-lg tracking-wide text-[#fffdf8]/88">
+        <p className="mt-5 text-center text-base leading-7 tracking-wide text-[#fffdf8]/88 sm:text-lg">
           Comparte tu mensaje de amor y buenos deseos
         </p>
 
@@ -231,21 +234,23 @@ export function LiveMessagesScreen() {
             ))}
           </AnimatePresence>
           {showEmptyState ? (
-            <p className="absolute inset-x-0 top-1/2 mx-auto max-w-xl -translate-y-1/2 text-center font-serif-display text-3xl font-semibold text-[#fffdf8]/62">
-              Sé el primero en dejar un mensaje para los novios
-            </p>
+            <div className="absolute inset-0 grid place-items-center">
+              <p className="mx-auto max-w-xl text-center font-serif-display text-3xl font-semibold text-[#fffdf8]/62">
+                Sé el primero en dejar un mensaje para los novios
+              </p>
+            </div>
           ) : null}
         </div>
 
         <MobileMessageStack messages={messagesToShow} />
         {showEmptyState ? (
-          <p className="mx-auto mt-10 max-w-md text-center font-serif-display text-2xl font-semibold text-[#fffdf8]/62 md:hidden">
+          <p className="mx-auto mt-10 max-w-md break-words text-center font-serif-display text-2xl font-semibold text-[#fffdf8]/62 md:hidden">
             Sé el primero en dejar un mensaje para los novios
           </p>
         ) : null}
 
         <div className="relative mt-auto flex flex-col items-center gap-3 pb-3 text-center">
-          <p className="text-sm uppercase tracking-[0.24em] text-[#d7bd83]">
+          <p className="break-words text-xs uppercase tracking-[0.18em] text-[#d7bd83] sm:text-sm sm:tracking-[0.24em]">
             Escanea el QR o entra a /mensajes para participar
           </p>
           <p className="text-sm text-[#fffdf8]/62">
