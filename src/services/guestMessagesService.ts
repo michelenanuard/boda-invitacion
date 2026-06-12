@@ -1,4 +1,6 @@
+import type { RealtimeChannel } from '@supabase/supabase-js'
 import { LIVE_MESSAGES_CONFIG } from '../config/liveMessagesConfig'
+import { isSupabaseConfigured as hasSupabaseConfig, supabase } from '../lib/supabaseClient'
 
 export type GuestMessageStatus = 'approved' | 'pending' | 'hidden'
 
@@ -24,6 +26,15 @@ type MessageInput = {
   photo?: string
 }
 
+type SupabaseGuestMessageRow = {
+  id: string
+  name: string
+  message: string
+  created_at: string
+  approved: boolean | null
+  likes: number | null
+}
+
 export const GUEST_MESSAGES_STORAGE_KEY = 'wedding-guest-messages'
 export const GUEST_MESSAGES_SETTINGS_KEY = 'wedding-guest-messages-settings'
 export const GUEST_MESSAGES_UPDATED_EVENT = 'guest-messages-updated'
@@ -32,6 +43,7 @@ const OLD_MESSAGE_STORAGE_KEYS = ['wedding-live-messages']
 const OLD_SETTINGS_STORAGE_KEYS = ['wedding-live-messages-settings']
 const GUEST_MESSAGES_CHANNEL = 'guest-messages-channel'
 const POLLING_FALLBACK_MS = 2000
+const SUPABASE_TABLE = 'guest_messages'
 
 const defaultSettings: GuestMessagesSettings = {
   moderationEnabled: false,
@@ -40,13 +52,13 @@ const defaultSettings: GuestMessagesSettings = {
 
 function logGuestMessages(message: string, data?: unknown) {
   if (import.meta.env.DEV) {
-    console.log(`[GuestMessages] ${message}`, data ?? '')
+    console.log(`[SupabaseMessages] ${message}`, data ?? '')
   }
 }
 
 function warnGuestMessages(message: string, error?: unknown) {
   if (import.meta.env.DEV) {
-    console.warn(`[GuestMessages] ${message}`, error ?? '')
+    console.warn(`[SupabaseMessages] ${message}`, error ?? '')
   }
 }
 
@@ -138,6 +150,20 @@ function normalizeStatus(value: unknown): GuestMessageStatus | undefined {
   return value === 'approved' || value === 'pending' || value === 'hidden' ? value : undefined
 }
 
+function mapSupabaseRowToGuestMessage(row: SupabaseGuestMessageRow): GuestMessage {
+  const approved = row.approved !== false
+
+  return {
+    id: row.id,
+    name: row.name.trim(),
+    message: row.message.trim(),
+    createdAt: parseCreatedAt(row.created_at),
+    approved,
+    likes: typeof row.likes === 'number' ? row.likes : 0,
+    status: approved ? 'approved' : 'hidden',
+  }
+}
+
 export function normalizeGuestMessage(message: unknown): GuestMessage | null {
   if (!isRecord(message)) {
     return null
@@ -182,6 +208,22 @@ function dedupeAndSortMessages(messages: GuestMessage[]) {
   return [...uniqueMessages.values()].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
 }
 
+function dedupeAndSortMessagesAscending(messages: GuestMessage[]) {
+  return dedupeAndSortMessages(messages).sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt))
+}
+
+export function isSupabaseConfigured() {
+  return hasSupabaseConfig && supabase !== null
+}
+
+function getSupabaseClient() {
+  if (!supabase) {
+    throw new Error('Supabase no esta configurado.')
+  }
+
+  return supabase
+}
+
 export function migrateGuestMessagesStorage() {
   if (typeof window === 'undefined') {
     return []
@@ -200,9 +242,9 @@ export function migrateGuestMessagesStorage() {
   const migratedMessages = dedupeAndSortMessages([...currentMessages, ...oldMessages])
 
   if (oldMessages.length > 0 || migratedMessages.length !== currentMessages.length) {
-    saveGuestMessages(migratedMessages, { emit: false })
+    saveLocalGuestMessages(migratedMessages, { emit: false })
     OLD_MESSAGE_STORAGE_KEYS.forEach(removeStorageItem)
-    logGuestMessages('Migracion completada', { count: migratedMessages.length })
+    logGuestMessages('Migracion localStorage completada', { count: migratedMessages.length })
   }
 
   OLD_SETTINGS_STORAGE_KEYS.forEach((oldKey) => {
@@ -218,7 +260,7 @@ export function migrateGuestMessagesStorage() {
   return migratedMessages
 }
 
-export function getGuestMessages() {
+function getLocalGuestMessages() {
   if (typeof window === 'undefined') {
     return []
   }
@@ -230,11 +272,37 @@ export function getGuestMessages() {
     .filter((message): message is GuestMessage => Boolean(message))
 
   const normalizedMessages = dedupeAndSortMessages(messages)
-  logGuestMessages('Mensajes leidos', { count: normalizedMessages.length })
+  logGuestMessages('Fallback localStorage activo', { count: normalizedMessages.length })
   return normalizedMessages
 }
 
-export function saveGuestMessages(messages: GuestMessage[], options: { emit?: boolean } = {}) {
+export async function getGuestMessages() {
+  if (!isSupabaseConfigured()) {
+    return getLocalGuestMessages()
+  }
+
+  const client = getSupabaseClient()
+  const { data, error } = await client
+    .from(SUPABASE_TABLE)
+    .select('id,name,message,created_at,approved,likes')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    warnGuestMessages('Error cargando mensajes', error)
+    throw new Error('No se pudieron cargar los mensajes.')
+  }
+
+  const messages = dedupeAndSortMessages(
+    (data ?? [])
+      .map((row) => mapSupabaseRowToGuestMessage(row as SupabaseGuestMessageRow))
+      .filter((message) => message.approved !== false),
+  )
+
+  logGuestMessages('Supabase configurado. Mensajes cargados', { count: messages.length })
+  return messages
+}
+
+function saveLocalGuestMessages(messages: GuestMessage[], options: { emit?: boolean } = {}) {
   if (typeof window === 'undefined') {
     return false
   }
@@ -250,6 +318,39 @@ export function saveGuestMessages(messages: GuestMessage[], options: { emit?: bo
   }
 
   return saved
+}
+
+export async function saveGuestMessages(messages: GuestMessage[], options: { emit?: boolean } = {}) {
+  if (!isSupabaseConfigured()) {
+    return saveLocalGuestMessages(messages, options)
+  }
+
+  const normalizedMessages = messages
+    .map(normalizeGuestMessage)
+    .filter((message): message is GuestMessage => Boolean(message))
+
+  const rows = normalizedMessages.map((message) => ({
+    id: message.id,
+    name: message.name,
+    message: message.message,
+    created_at: message.createdAt,
+    approved: message.approved !== false,
+    likes: message.likes ?? 0,
+  }))
+
+  const client = getSupabaseClient()
+  const { error } = await client.from(SUPABASE_TABLE).upsert(rows)
+
+  if (error) {
+    warnGuestMessages('Error guardando mensajes', error)
+    throw new Error('No se pudieron guardar los mensajes.')
+  }
+
+  if (options.emit !== false) {
+    emitGuestMessagesUpdated()
+  }
+
+  return true
 }
 
 export function getGuestMessagesSettings(): GuestMessagesSettings {
@@ -302,39 +403,111 @@ export function saveGuestMessagesSettings(settings: GuestMessagesSettings) {
   return saved
 }
 
-export function saveGuestMessage(input: MessageInput) {
-  const message: GuestMessage = {
-    id: createId(),
-    name: input.name.trim(),
-    message: input.message.trim(),
-    photo: input.photo,
-    createdAt: new Date().toISOString(),
-    approved: true,
-    likes: 0,
-    status: 'approved',
+export async function saveGuestMessage(input: MessageInput) {
+  const name = input.name.trim()
+  const text = input.message.trim()
+
+  if (!name || !text) {
+    throw new Error('Escribe tu nombre y un mensaje antes de enviarlo.')
   }
 
-  const saved = saveGuestMessages([message, ...getGuestMessages()])
+  if (!isSupabaseConfigured()) {
+    const message: GuestMessage = {
+      id: createId(),
+      name,
+      message: text,
+      photo: input.photo,
+      createdAt: new Date().toISOString(),
+      approved: true,
+      likes: 0,
+      status: 'approved',
+    }
 
-  if (!saved) {
+    const saved = saveLocalGuestMessages([message, ...getLocalGuestMessages()])
+
+    if (!saved) {
+      throw new Error('No se pudo guardar el mensaje.')
+    }
+
+    logGuestMessages('Mensaje guardado en fallback localStorage', message)
+    return message
+  }
+
+  const client = getSupabaseClient()
+  const { data, error } = await client
+    .from(SUPABASE_TABLE)
+    .insert({
+      name,
+      message: text,
+      approved: true,
+      likes: 0,
+    })
+    .select('id,name,message,created_at,approved,likes')
+    .single()
+
+  if (error || !data) {
+    warnGuestMessages('Error insertando mensaje', error)
     throw new Error('No se pudo guardar el mensaje.')
   }
 
-  logGuestMessages('Mensaje guardado', message)
-  return message
+  const savedMessage = mapSupabaseRowToGuestMessage(data as SupabaseGuestMessageRow)
+  logGuestMessages('Mensaje insertado', savedMessage)
+  return savedMessage
 }
 
-export function updateGuestMessageStatus(id: string, status: GuestMessageStatus) {
-  const approved = status === 'approved' ? true : false
-  saveGuestMessages(getGuestMessages().map((message) => (message.id === id ? { ...message, status, approved } : message)))
+export async function updateGuestMessageStatus(id: string, status: GuestMessageStatus) {
+  const approved = status === 'approved'
+
+  if (!isSupabaseConfigured()) {
+    saveLocalGuestMessages(
+      getLocalGuestMessages().map((message) => (message.id === id ? { ...message, status, approved } : message)),
+    )
+    return
+  }
+
+  const client = getSupabaseClient()
+  const { error } = await client.from(SUPABASE_TABLE).update({ approved }).eq('id', id)
+
+  if (error) {
+    warnGuestMessages('Error actualizando mensaje', error)
+    throw new Error('No se pudo actualizar el mensaje.')
+  }
+
+  emitGuestMessagesUpdated()
 }
 
-export function deleteGuestMessage(id: string) {
-  saveGuestMessages(getGuestMessages().filter((message) => message.id !== id))
+export async function deleteGuestMessage(id: string) {
+  if (!isSupabaseConfigured()) {
+    saveLocalGuestMessages(getLocalGuestMessages().filter((message) => message.id !== id))
+    return
+  }
+
+  const client = getSupabaseClient()
+  const { error } = await client.from(SUPABASE_TABLE).delete().eq('id', id)
+
+  if (error) {
+    warnGuestMessages('Error eliminando mensaje', error)
+    throw new Error('No se pudo eliminar el mensaje.')
+  }
+
+  emitGuestMessagesUpdated()
 }
 
-export function clearGuestMessagesForTesting() {
-  saveGuestMessages([])
+export async function clearGuestMessagesForTesting() {
+  if (!isSupabaseConfigured()) {
+    saveLocalGuestMessages([])
+    return
+  }
+
+  const client = getSupabaseClient()
+  const { error } = await client.from(SUPABASE_TABLE).delete().neq('id', '00000000-0000-0000-0000-000000000000')
+
+  if (error) {
+    warnGuestMessages('Error limpiando mensajes', error)
+    throw new Error('No se pudieron limpiar los mensajes.')
+  }
+
+  emitGuestMessagesUpdated()
 }
 
 export function resetMessagesCacheForTesting() {
@@ -353,7 +526,6 @@ export function emitGuestMessagesUpdated() {
   }
 
   window.dispatchEvent(new CustomEvent(GUEST_MESSAGES_UPDATED_EVENT))
-  logGuestMessages('Evento emitido')
 
   const channel = getChannel()
 
@@ -364,7 +536,7 @@ export function emitGuestMessagesUpdated() {
   }
 }
 
-export function subscribeToGuestMessages(callback: () => void) {
+function subscribeToLocalGuestMessages(callback: () => void) {
   if (typeof window === 'undefined') {
     return () => undefined
   }
@@ -373,7 +545,7 @@ export function subscribeToGuestMessages(callback: () => void) {
   const channel = getChannel()
 
   const runCallback = (reason: string) => {
-    logGuestMessages(`Evento recibido: ${reason}`)
+    logGuestMessages(`Evento local recibido: ${reason}`)
     callback()
   }
 
@@ -419,13 +591,53 @@ export function subscribeToGuestMessages(callback: () => void) {
   }
 }
 
+export function subscribeToGuestMessages(callback: () => void) {
+  if (!isSupabaseConfigured()) {
+    logGuestMessages('Fallback localStorage activo')
+    return subscribeToLocalGuestMessages(callback)
+  }
+
+  callback()
+
+  const client = getSupabaseClient()
+  const channel: RealtimeChannel = client
+    .channel('guest_messages_realtime')
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: SUPABASE_TABLE,
+      },
+      (payload) => {
+        const nextMessage = mapSupabaseRowToGuestMessage(payload.new as SupabaseGuestMessageRow)
+
+        if (nextMessage.approved !== false) {
+          logGuestMessages('Realtime recibido', nextMessage)
+          callback()
+        }
+      },
+    )
+    .subscribe((status) => {
+      logGuestMessages('Estado realtime', status)
+    })
+
+  return () => {
+    void client.removeChannel(channel)
+  }
+}
+
+export function mergeGuestMessages(currentMessages: GuestMessage[], incomingMessages: GuestMessage[]) {
+  return dedupeAndSortMessagesAscending([...currentMessages, ...incomingMessages])
+}
+
 export function installGuestMessagesDevTools() {
   if (!import.meta.env.DEV || typeof window === 'undefined') {
     return
   }
 
   const devWindow = window as typeof window & {
-    __addTestGuestMessage?: () => GuestMessage
+    __addTestGuestMessage?: () => Promise<GuestMessage>
     __resetGuestMessages?: () => void
   }
 

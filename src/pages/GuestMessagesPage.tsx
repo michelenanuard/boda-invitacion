@@ -31,7 +31,7 @@ export function GuestMessagesPage() {
 
   const canSubmit = useMemo(() => name.trim().length >= 2 && message.trim().length >= 4, [message, name])
 
-  const submitMessage = (event: FormEvent<HTMLFormElement>) => {
+  const submitMessage = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     if (!canSubmit) {
@@ -47,7 +47,7 @@ export function GuestMessagesPage() {
     setSubmitError('')
 
     try {
-      const nextMessage = saveGuestMessage({ name, message, photo: photo || undefined })
+      const nextMessage = await saveGuestMessage({ name, message, photo: photo || undefined })
       setName('')
       setMessage('')
       setPhoto('')

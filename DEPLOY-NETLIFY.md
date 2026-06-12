@@ -3,7 +3,7 @@
 Guia para publicar cambios del proyecto en el sitio existente:
 
 ```text
-https://transcendent-bunny-1dd924.netlify.app
+https://anakary-marcos.netlify.app
 ```
 
 ## 1. Instalar Netlify CLI
@@ -39,7 +39,7 @@ netlify link
 Cuando Netlify pregunte que sitio usar, selecciona el sitio existente:
 
 ```text
-transcendent-bunny-1dd924
+anakary-marcos
 ```
 
 Esto crea la carpeta local `.netlify/` con la vinculacion del sitio. No es necesario subir esa carpeta manualmente.
@@ -73,7 +73,7 @@ netlify deploy --prod --dir=dist
 Al terminar, revisa:
 
 ```text
-https://transcendent-bunny-1dd924.netlify.app
+https://anakary-marcos.netlify.app
 ```
 
 ## 7. Rutas a probar despues del deploy
@@ -116,6 +116,6 @@ Ambas reglas apuntan al mismo fallback de React Router y no se contradicen.
 
 1. La terminal debe mostrar que el deploy finalizo sin errores.
 2. Para produccion, Netlify debe indicar que publico con `--prod`.
-3. La URL `https://transcendent-bunny-1dd924.netlify.app` debe cargar la invitacion actualizada.
+3. La URL `https://anakary-marcos.netlify.app` debe cargar la invitacion actualizada.
 4. Las rutas internas deben abrir directo sin 404.
 5. En Netlify, el panel del sitio debe mostrar el deploy mas reciente como publicado.

@@ -18,14 +18,14 @@ function dedupeAndSortMessages(messages: GuestMessage[]) {
 }
 
 export function useGuestMessages() {
-  const [messages, setMessages] = useState<GuestMessage[]>(() => dedupeAndSortMessages(getGuestMessages()))
+  const [messages, setMessages] = useState<GuestMessage[]>([])
   const [settings, setSettings] = useState<GuestMessagesSettings>(() => getGuestMessagesSettings())
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  const refreshMessages = useCallback(() => {
+  const refreshMessages = useCallback(async () => {
     try {
-      setMessages(dedupeAndSortMessages(getGuestMessages()))
+      setMessages(dedupeAndSortMessages(await getGuestMessages()))
       setSettings(getGuestMessagesSettings())
       setError('')
     } catch (refreshError) {
@@ -36,7 +36,11 @@ export function useGuestMessages() {
   }, [])
 
   useEffect(() => {
-    const refreshAsync = () => window.setTimeout(refreshMessages, 0)
+    const refreshAsync = () => {
+      window.setTimeout(() => {
+        void refreshMessages()
+      }, 0)
+    }
     const unsubscribe = subscribeToGuestMessages(refreshAsync)
 
     const handleVisibilityChange = () => {
