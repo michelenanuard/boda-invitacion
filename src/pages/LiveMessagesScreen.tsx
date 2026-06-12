@@ -84,14 +84,16 @@ function LiveMessageCard({ message }: { message: VisibleMessage }) {
     >
       <div className="flex gap-4">
         <MessageAvatar message={message} className="h-16 w-16 text-2xl" />
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 overflow-hidden">
           <div className="flex items-start justify-between gap-3">
             <h2 className="font-serif-display text-2xl font-semibold leading-none text-[#9c6f2d]">
               {message.name}
             </h2>
             <Heart className="h-5 w-5 shrink-0 text-[#b88a43]" aria-hidden="true" />
           </div>
-          <p className="mt-2 text-sm leading-6 text-[#211b17]">{message.message}</p>
+          <p className="mt-2 max-h-44 overflow-y-auto whitespace-pre-wrap break-words text-justify text-sm leading-6 text-[#211b17] [overflow-wrap:anywhere]">
+            {message.message}
+          </p>
         </div>
       </div>
     </motion.article>
@@ -114,9 +116,11 @@ function MobileMessageStack({ messages }: { messages: VisibleMessage[] }) {
           >
             <div className="flex gap-4">
               <MessageAvatar message={message} className="h-14 w-14 text-xl" />
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1 overflow-hidden">
                 <p className="break-words font-serif-display text-xl font-semibold text-[#9c6f2d]">{message.name}</p>
-                <p className="mt-1 break-words text-sm leading-6">{message.message}</p>
+                <p className="mt-1 max-h-44 overflow-y-auto whitespace-pre-wrap break-words text-justify text-sm leading-6 [overflow-wrap:anywhere]">
+                  {message.message}
+                </p>
               </div>
             </div>
           </motion.div>

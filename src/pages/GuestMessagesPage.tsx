@@ -56,9 +56,10 @@ export function GuestMessagesPage() {
           ? 'Gracias. Tu mensaje fue enviado y aparecerá cuando sea aprobado.'
           : 'Gracias. Tu mensaje ya está listo para aparecer en pantalla.',
       )
-    } catch {
+    } catch (error) {
+      console.error('[SupabaseMessages] Error enviando formulario', error)
       setStatus('')
-      setSubmitError('No pudimos guardar tu mensaje. Inténtalo de nuevo en unos segundos.')
+      setSubmitError('No pudimos enviar tu mensaje en este momento. Intenta nuevamente.')
     } finally {
       setIsSubmitting(false)
     }

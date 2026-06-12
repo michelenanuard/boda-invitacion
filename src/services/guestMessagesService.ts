@@ -62,6 +62,10 @@ function warnGuestMessages(message: string, error?: unknown) {
   }
 }
 
+function errorGuestMessages(message: string, error?: unknown) {
+  console.error(`[SupabaseMessages] ${message}`, error ?? '')
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
@@ -150,7 +154,7 @@ function normalizeStatus(value: unknown): GuestMessageStatus | undefined {
   return value === 'approved' || value === 'pending' || value === 'hidden' ? value : undefined
 }
 
-function mapSupabaseRowToGuestMessage(row: SupabaseGuestMessageRow): GuestMessage {
+export function mapSupabaseMessage(row: SupabaseGuestMessageRow): GuestMessage {
   const approved = row.approved !== false
 
   return {
@@ -161,6 +165,15 @@ function mapSupabaseRowToGuestMessage(row: SupabaseGuestMessageRow): GuestMessag
     approved,
     likes: typeof row.likes === 'number' ? row.likes : 0,
     status: approved ? 'approved' : 'hidden',
+  }
+}
+
+export function mapGuestMessageToInsert(input: MessageInput) {
+  return {
+    name: input.name.trim(),
+    message: input.message.trim(),
+    approved: true,
+    likes: 0,
   }
 }
 
@@ -216,12 +229,51 @@ export function isSupabaseConfigured() {
   return hasSupabaseConfig && supabase !== null
 }
 
+function canUseLocalStorageFallback() {
+  return import.meta.env.DEV && !isSupabaseConfigured()
+}
+
+function reportMissingSupabaseConfig() {
+  errorGuestMessages('Supabase no configurado', {
+    hasUrl: Boolean(import.meta.env.VITE_SUPABASE_URL),
+    hasAnonKey: Boolean(import.meta.env.VITE_SUPABASE_ANON_KEY),
+  })
+}
+
 function getSupabaseClient() {
   if (!supabase) {
-    throw new Error('Supabase no esta configurado.')
+    reportMissingSupabaseConfig()
+    throw new Error('Supabase no esta configurado. Revisa variables VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en Netlify.')
   }
 
   return supabase
+}
+
+function getSupabaseUserMessage(error: unknown) {
+  const text = error instanceof Error ? error.message : String(error ?? '')
+  const lowerText = text.toLowerCase()
+
+  if (lowerText.includes('row-level security') || lowerText.includes('violates row-level security')) {
+    return 'Supabase rechazo el mensaje por politicas RLS. Revisa la policy de insert para anon.'
+  }
+
+  if (lowerText.includes('permission denied')) {
+    return 'Supabase rechazo el mensaje por permisos. Revisa las politicas de la tabla guest_messages.'
+  }
+
+  if (lowerText.includes('relation') && lowerText.includes('does not exist')) {
+    return 'La tabla guest_messages no existe o esta en otro schema/proyecto.'
+  }
+
+  if (lowerText.includes('invalid api key') || lowerText.includes('jwt')) {
+    return 'La anon key de Supabase no es valida. Revisa VITE_SUPABASE_ANON_KEY.'
+  }
+
+  if (lowerText.includes('failed to fetch') || lowerText.includes('network')) {
+    return 'No se pudo conectar con Supabase. Revisa la URL, CORS o la conexion.'
+  }
+
+  return 'No se pudo guardar el mensaje en Supabase.'
 }
 
 export function migrateGuestMessagesStorage() {
@@ -277,24 +329,25 @@ function getLocalGuestMessages() {
 }
 
 export async function getGuestMessages() {
-  if (!isSupabaseConfigured()) {
+  if (canUseLocalStorageFallback()) {
     return getLocalGuestMessages()
   }
 
   const client = getSupabaseClient()
   const { data, error } = await client
     .from(SUPABASE_TABLE)
-    .select('id,name,message,created_at,approved,likes')
+    .select('*')
     .order('created_at', { ascending: false })
+    .limit(50)
 
   if (error) {
-    warnGuestMessages('Error cargando mensajes', error)
-    throw new Error('No se pudieron cargar los mensajes.')
+    errorGuestMessages('Error cargando mensajes', error)
+    throw new Error(getSupabaseUserMessage(error))
   }
 
   const messages = dedupeAndSortMessages(
     (data ?? [])
-      .map((row) => mapSupabaseRowToGuestMessage(row as SupabaseGuestMessageRow))
+      .map((row) => mapSupabaseMessage(row as SupabaseGuestMessageRow))
       .filter((message) => message.approved !== false),
   )
 
@@ -321,7 +374,7 @@ function saveLocalGuestMessages(messages: GuestMessage[], options: { emit?: bool
 }
 
 export async function saveGuestMessages(messages: GuestMessage[], options: { emit?: boolean } = {}) {
-  if (!isSupabaseConfigured()) {
+  if (canUseLocalStorageFallback()) {
     return saveLocalGuestMessages(messages, options)
   }
 
@@ -342,8 +395,8 @@ export async function saveGuestMessages(messages: GuestMessage[], options: { emi
   const { error } = await client.from(SUPABASE_TABLE).upsert(rows)
 
   if (error) {
-    warnGuestMessages('Error guardando mensajes', error)
-    throw new Error('No se pudieron guardar los mensajes.')
+    errorGuestMessages('Error guardando mensajes', error)
+    throw new Error(getSupabaseUserMessage(error))
   }
 
   if (options.emit !== false) {
@@ -411,7 +464,7 @@ export async function saveGuestMessage(input: MessageInput) {
     throw new Error('Escribe tu nombre y un mensaje antes de enviarlo.')
   }
 
-  if (!isSupabaseConfigured()) {
+  if (canUseLocalStorageFallback()) {
     const message: GuestMessage = {
       id: createId(),
       name,
@@ -434,23 +487,22 @@ export async function saveGuestMessage(input: MessageInput) {
   }
 
   const client = getSupabaseClient()
+  const insertPayload = mapGuestMessageToInsert({ name, message: text })
+
+  logGuestMessages('Enviando mensaje a Supabase')
+
   const { data, error } = await client
     .from(SUPABASE_TABLE)
-    .insert({
-      name,
-      message: text,
-      approved: true,
-      likes: 0,
-    })
-    .select('id,name,message,created_at,approved,likes')
+    .insert(insertPayload)
+    .select('*')
     .single()
 
   if (error || !data) {
-    warnGuestMessages('Error insertando mensaje', error)
-    throw new Error('No se pudo guardar el mensaje.')
+    errorGuestMessages('Error insertando mensaje', error)
+    throw new Error(getSupabaseUserMessage(error))
   }
 
-  const savedMessage = mapSupabaseRowToGuestMessage(data as SupabaseGuestMessageRow)
+  const savedMessage = mapSupabaseMessage(data as SupabaseGuestMessageRow)
   logGuestMessages('Mensaje insertado', savedMessage)
   return savedMessage
 }
@@ -458,7 +510,7 @@ export async function saveGuestMessage(input: MessageInput) {
 export async function updateGuestMessageStatus(id: string, status: GuestMessageStatus) {
   const approved = status === 'approved'
 
-  if (!isSupabaseConfigured()) {
+  if (canUseLocalStorageFallback()) {
     saveLocalGuestMessages(
       getLocalGuestMessages().map((message) => (message.id === id ? { ...message, status, approved } : message)),
     )
@@ -469,15 +521,15 @@ export async function updateGuestMessageStatus(id: string, status: GuestMessageS
   const { error } = await client.from(SUPABASE_TABLE).update({ approved }).eq('id', id)
 
   if (error) {
-    warnGuestMessages('Error actualizando mensaje', error)
-    throw new Error('No se pudo actualizar el mensaje.')
+    errorGuestMessages('Error actualizando mensaje', error)
+    throw new Error(getSupabaseUserMessage(error))
   }
 
   emitGuestMessagesUpdated()
 }
 
 export async function deleteGuestMessage(id: string) {
-  if (!isSupabaseConfigured()) {
+  if (canUseLocalStorageFallback()) {
     saveLocalGuestMessages(getLocalGuestMessages().filter((message) => message.id !== id))
     return
   }
@@ -486,15 +538,15 @@ export async function deleteGuestMessage(id: string) {
   const { error } = await client.from(SUPABASE_TABLE).delete().eq('id', id)
 
   if (error) {
-    warnGuestMessages('Error eliminando mensaje', error)
-    throw new Error('No se pudo eliminar el mensaje.')
+    errorGuestMessages('Error eliminando mensaje', error)
+    throw new Error(getSupabaseUserMessage(error))
   }
 
   emitGuestMessagesUpdated()
 }
 
 export async function clearGuestMessagesForTesting() {
-  if (!isSupabaseConfigured()) {
+  if (canUseLocalStorageFallback()) {
     saveLocalGuestMessages([])
     return
   }
@@ -503,8 +555,8 @@ export async function clearGuestMessagesForTesting() {
   const { error } = await client.from(SUPABASE_TABLE).delete().neq('id', '00000000-0000-0000-0000-000000000000')
 
   if (error) {
-    warnGuestMessages('Error limpiando mensajes', error)
-    throw new Error('No se pudieron limpiar los mensajes.')
+    errorGuestMessages('Error limpiando mensajes', error)
+    throw new Error(getSupabaseUserMessage(error))
   }
 
   emitGuestMessagesUpdated()
@@ -536,7 +588,7 @@ export function emitGuestMessagesUpdated() {
   }
 }
 
-function subscribeToLocalGuestMessages(callback: () => void) {
+function subscribeToLocalGuestMessages(callback: (message?: GuestMessage) => void) {
   if (typeof window === 'undefined') {
     return () => undefined
   }
@@ -591,10 +643,15 @@ function subscribeToLocalGuestMessages(callback: () => void) {
   }
 }
 
-export function subscribeToGuestMessages(callback: () => void) {
-  if (!isSupabaseConfigured()) {
+export function subscribeToGuestMessages(callback: (message?: GuestMessage) => void) {
+  if (canUseLocalStorageFallback()) {
     logGuestMessages('Fallback localStorage activo')
     return subscribeToLocalGuestMessages(callback)
+  }
+
+  if (!isSupabaseConfigured()) {
+    reportMissingSupabaseConfig()
+    return () => undefined
   }
 
   callback()
@@ -610,11 +667,11 @@ export function subscribeToGuestMessages(callback: () => void) {
         table: SUPABASE_TABLE,
       },
       (payload) => {
-        const nextMessage = mapSupabaseRowToGuestMessage(payload.new as SupabaseGuestMessageRow)
+        const nextMessage = mapSupabaseMessage(payload.new as SupabaseGuestMessageRow)
 
         if (nextMessage.approved !== false) {
           logGuestMessages('Realtime recibido', nextMessage)
-          callback()
+          callback(nextMessage)
         }
       },
     )
@@ -638,6 +695,7 @@ export function installGuestMessagesDevTools() {
 
   const devWindow = window as typeof window & {
     __addTestGuestMessage?: () => Promise<GuestMessage>
+    __testSupabaseInsert?: () => Promise<GuestMessage>
     __resetGuestMessages?: () => void
   }
 
@@ -645,6 +703,12 @@ export function installGuestMessagesDevTools() {
     saveGuestMessage({
       name: 'Mensaje de prueba',
       message: `Prueba enviada ${new Date().toLocaleTimeString()}`,
+    })
+
+  devWindow.__testSupabaseInsert = () =>
+    saveGuestMessage({
+      name: 'Prueba Dev',
+      message: 'Mensaje de prueba desde consola',
     })
 
   devWindow.__resetGuestMessages = resetMessagesCacheForTesting
