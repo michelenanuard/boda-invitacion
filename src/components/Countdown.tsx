@@ -1,9 +1,12 @@
-import { CalendarHeart } from 'lucide-react'
+import { CalendarHeart, CalendarPlus } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import type { WeddingEvent } from '../types/wedding'
 
 interface CountdownProps {
   weddingDate: string
   weddingTime: string
+  coupleDisplayName: string
+  ceremony: WeddingEvent
 }
 
 interface TimeLeft {
@@ -24,7 +27,70 @@ function getTimeLeft(targetDate: Date): TimeLeft {
   }
 }
 
-export function Countdown({ weddingDate, weddingTime }: CountdownProps) {
+function formatCalendarDate(date: Date) {
+  return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
+}
+
+function escapeCalendarText(value: string) {
+  return value.replace(/\\/g, '\\\\').replace(/,/g, '\\,').replace(/;/g, '\\;').replace(/\n/g, '\\n')
+}
+
+function createCalendarUid() {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID()
+  }
+
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
+
+function downloadCalendarEvent({
+  coupleDisplayName,
+  ceremony,
+  targetDate,
+}: {
+  coupleDisplayName: string
+  ceremony: WeddingEvent
+  targetDate: Date
+}) {
+  if (Number.isNaN(targetDate.getTime())) {
+    return
+  }
+
+  const endDate = new Date(targetDate.getTime() + 90 * 60 * 1000)
+  const title = `Boda de ${coupleDisplayName}`
+  const description = `Ceremonia en ${ceremony.venue}. ${ceremony.note ?? ''}`.trim()
+  const location = [ceremony.venue, ceremony.address].filter(Boolean).join(', ')
+  const calendarContent = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Wedding Invitation//Save The Date//ES',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    `UID:${createCalendarUid()}@wedding-invitation`,
+    `DTSTAMP:${formatCalendarDate(new Date())}`,
+    `DTSTART:${formatCalendarDate(targetDate)}`,
+    `DTEND:${formatCalendarDate(endDate)}`,
+    `SUMMARY:${escapeCalendarText(title)}`,
+    `DESCRIPTION:${escapeCalendarText(description)}`,
+    `LOCATION:${escapeCalendarText(location)}`,
+    'END:VEVENT',
+    'END:VCALENDAR',
+  ].join('\r\n')
+
+  const file = new Blob([calendarContent], { type: 'text/calendar;charset=utf-8' })
+  const fileUrl = URL.createObjectURL(file)
+  const link = document.createElement('a')
+
+  link.href = fileUrl
+  link.download = `save-the-date-${coupleDisplayName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.ics`
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(fileUrl)
+}
+
+export function Countdown({ weddingDate, weddingTime, coupleDisplayName, ceremony }: CountdownProps) {
   const targetDate = useMemo(() => new Date(`${weddingDate}T${weddingTime}`), [weddingDate, weddingTime])
   const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => getTimeLeft(targetDate))
 
@@ -72,6 +138,16 @@ export function Countdown({ weddingDate, weddingTime }: CountdownProps) {
                 </div>
               </div>
             ))}
+            <div className="col-span-2 mt-2 flex justify-center sm:col-span-4 md:justify-end">
+              <button
+                type="button"
+                className="inline-flex min-h-12 items-center justify-center gap-3 rounded-full border border-[#b88a43]/32 bg-[#fffdf8]/58 px-6 text-sm font-semibold uppercase tracking-[0.16em] text-[#9c6f2d] transition hover:border-[#b88a43]/58 hover:bg-[#fffdf8] hover:text-[#211b17] focus:outline-none focus:ring-4 focus:ring-[#b88a43]/16"
+                onClick={() => downloadCalendarEvent({ coupleDisplayName, ceremony, targetDate })}
+              >
+                <CalendarPlus className="h-4 w-4" aria-hidden="true" />
+                Agregar al calendario
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -8,6 +8,7 @@ export type AdminEditorContext = {
   pageTitle: string
   isDirty: boolean
   savedMessage: string
+  saveError: string
   logout: () => void
 }
 

@@ -42,6 +42,7 @@ export function AdminApp() {
   const { content, saveContent } = useWeddingContent()
   const [draft, setDraft] = useState<WeddingContent>(content)
   const [savedMessage, setSavedMessage] = useState('')
+  const [saveError, setSaveError] = useState('')
 
   const isDirty = useMemo(() => JSON.stringify(draft) !== JSON.stringify(content), [content, draft])
   const pageTitle = pageTitles[location.pathname] ?? 'Administrador'
@@ -60,9 +61,20 @@ export function AdminApp() {
   }, [isDirty])
 
   const saveDraft = () => {
-    saveContent(draft)
-    setSavedMessage('Cambios guardados correctamente')
-    window.setTimeout(() => setSavedMessage(''), 2500)
+    try {
+      saveContent(draft)
+      setSaveError('')
+      setSavedMessage('Cambios guardados correctamente')
+      window.setTimeout(() => setSavedMessage(''), 2500)
+    } catch (error) {
+      setSavedMessage('')
+      setSaveError(error instanceof Error ? error.message : 'No se pudieron guardar los cambios.')
+    }
+  }
+
+  const updateDraft = (nextDraft: WeddingContent) => {
+    setSaveError('')
+    setDraft(nextDraft)
   }
 
   const logout = () => {
@@ -76,7 +88,7 @@ export function AdminApp() {
 
   return (
     <AdminContext.Provider
-      value={{ draft, updateDraft: setDraft, saveDraft, pageTitle, isDirty, savedMessage, logout }}
+      value={{ draft, updateDraft, saveDraft, pageTitle, isDirty, savedMessage, saveError, logout }}
     >
       <Routes>
         <Route element={<AdminLayout />}>

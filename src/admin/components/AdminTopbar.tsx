@@ -3,10 +3,11 @@ import { ExternalLink, Save } from 'lucide-react'
 type AdminTopbarProps = {
   title: string
   isDirty: boolean
+  saveError: string
   onSave: () => void
 }
 
-export function AdminTopbar({ title, isDirty, onSave }: AdminTopbarProps) {
+export function AdminTopbar({ title, isDirty, saveError, onSave }: AdminTopbarProps) {
   return (
     <header className="sticky top-0 z-20 border-b border-stone-200 bg-[#f8f3ea]/90 px-5 py-4 backdrop-blur md:px-8">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -15,6 +16,11 @@ export function AdminTopbar({ title, isDirty, onSave }: AdminTopbarProps) {
           <h1 className="font-sans text-2xl font-bold text-stone-950">{title}</h1>
         </div>
         <div className="flex flex-wrap gap-2">
+          {saveError ? (
+            <span className="inline-flex min-h-10 max-w-md items-center rounded-full bg-rose-50 px-4 text-sm font-semibold text-rose-800">
+              {saveError}
+            </span>
+          ) : null}
           {isDirty ? (
             <span className="inline-flex min-h-10 items-center rounded-full bg-amber-50 px-4 text-sm font-semibold text-amber-800">
               Cambios sin guardar

@@ -39,7 +39,12 @@ function InvitationPage() {
       <main>
         <Hero data={content} />
         <EventDetails ceremony={content.ceremony} reception={content.reception} />
-        <Countdown weddingDate={content.weddingDate} weddingTime={content.weddingTime} />
+        <Countdown
+          weddingDate={content.weddingDate}
+          weddingTime={content.weddingTime}
+          coupleDisplayName={content.coupleDisplayName}
+          ceremony={content.ceremony}
+        />
         <Couple bride={content.bride} groom={content.groom} />
         <StoryTimeline story={content.story} />
         <Gallery images={content.gallery} video={content.galleryVideo} />

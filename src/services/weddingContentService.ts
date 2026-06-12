@@ -4,6 +4,10 @@ import type { WeddingContent } from '../types/wedding'
 export const WEDDING_CONTENT_STORAGE_KEY = 'wedding-invitation-content'
 export const WEDDING_CONTENT_UPDATED_EVENT = 'wedding-content-updated'
 
+function isQuotaExceededError(error: unknown) {
+  return error instanceof DOMException && (error.name === 'QuotaExceededError' || error.name === 'NS_ERROR_DOM_QUOTA_REACHED')
+}
+
 function cloneContent(content: WeddingContent): WeddingContent {
   return JSON.parse(JSON.stringify(content)) as WeddingContent
 }
@@ -44,8 +48,19 @@ export function getWeddingContent(): WeddingContent {
 }
 
 export function saveWeddingContent(content: WeddingContent) {
-  window.localStorage.setItem(WEDDING_CONTENT_STORAGE_KEY, JSON.stringify(content))
-  window.dispatchEvent(new CustomEvent(WEDDING_CONTENT_UPDATED_EVENT, { detail: content }))
+  try {
+    window.localStorage.setItem(WEDDING_CONTENT_STORAGE_KEY, JSON.stringify(content))
+    window.dispatchEvent(new CustomEvent(WEDDING_CONTENT_UPDATED_EVENT, { detail: content }))
+  } catch (error) {
+    if (isQuotaExceededError(error)) {
+      throw new Error(
+        'No hay espacio suficiente en el navegador para guardar estos cambios. Usa imagenes mas livianas o elimina algunas fotos cargadas.',
+        { cause: error },
+      )
+    }
+
+    throw error
+  }
 }
 
 export function resetWeddingContent() {
