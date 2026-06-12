@@ -72,7 +72,7 @@ export function GuestMessagesPage() {
         </div>
 
         <form
-          className="mx-auto mt-8 grid w-full max-w-5xl gap-4 rounded-[8px] border border-[#b88a43]/46 bg-[#17120d]/82 p-4 shadow-[0_28px_90px_rgba(0,0,0,0.34)] backdrop-blur sm:mt-10 md:grid-cols-[auto_1fr_1.35fr_auto] md:items-end md:p-5"
+          className="mx-auto mt-8 grid w-full max-w-5xl gap-4 rounded-[8px] border border-[#b88a43]/46 bg-[#17120d]/82 p-4 shadow-[0_28px_90px_rgba(0,0,0,0.34)] backdrop-blur sm:mt-10 md:grid-cols-[auto_1fr_1.35fr_auto] md:items-center md:p-5"
           onSubmit={submitMessage}
         >
           <label className="grid justify-items-center gap-3 text-sm font-semibold text-[#d7bd83] md:justify-items-start">
@@ -99,7 +99,7 @@ export function GuestMessagesPage() {
             <span className="sr-only">Tu nombre</span>
             <UserRound className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#d7bd83]" />
             <input
-              className="min-h-14 w-full rounded-[8px] border border-[#b88a43]/38 bg-[#100d0a]/72 pl-12 pr-4 text-base text-[#fffdf8] outline-none transition placeholder:text-[#f3eadb]/48 focus:border-[#d7bd83] focus:ring-4 focus:ring-[#b88a43]/15"
+              className="h-14 min-h-14 w-full rounded-[8px] border border-[#b88a43]/38 bg-[#100d0a]/72 pl-12 pr-4 text-base text-[#fffdf8] outline-none transition placeholder:text-[#f3eadb]/48 focus:border-[#d7bd83] focus:ring-4 focus:ring-[#b88a43]/15"
               value={name}
               maxLength={40}
               autoComplete="name"
@@ -108,11 +108,19 @@ export function GuestMessagesPage() {
             />
           </label>
 
-          <label className="relative block min-w-0">
+          <label className="relative block min-w-0 md:translate-y-[3px]">
             <span className="sr-only">Mensaje</span>
             <PenLine className="pointer-events-none absolute left-4 top-5 h-5 w-5 text-[#d7bd83] md:top-1/2 md:-translate-y-1/2" />
             <textarea
-              className="min-h-28 w-full resize-y rounded-[8px] border border-[#b88a43]/38 bg-[#100d0a]/72 py-4 pl-12 pr-20 text-base text-[#fffdf8] outline-none transition placeholder:text-[#f3eadb]/48 focus:border-[#d7bd83] focus:ring-4 focus:ring-[#b88a43]/15 md:min-h-14 md:resize-none"
+              className="h-28 min-h-28 w-full resize-y rounded-[8px] border border-[#b88a43]/38 bg-[#100d0a]/72 py-4 pl-12 pr-20 text-base leading-6 text-[#fffdf8] outline-none transition placeholder:text-[#f3eadb]/48 focus:border-[#d7bd83] focus:ring-4 focus:ring-[#b88a43]/15 md:hidden"
+              value={message}
+              maxLength={MAX_MESSAGE_LENGTH}
+              onChange={(event) => setMessage(event.target.value)}
+              placeholder="Escribe tu mensaje para los novios..."
+              rows={1}
+            />
+            <input
+              className="hidden h-14 min-h-14 w-full rounded-[8px] border border-[#b88a43]/38 bg-[#100d0a]/72 pl-12 pr-16 text-base leading-none text-[#fffdf8] outline-none transition placeholder:text-[#f3eadb]/48 focus:border-[#d7bd83] focus:ring-4 focus:ring-[#b88a43]/15 md:block"
               value={message}
               maxLength={MAX_MESSAGE_LENGTH}
               onChange={(event) => setMessage(event.target.value)}
@@ -125,7 +133,7 @@ export function GuestMessagesPage() {
 
           <button
             type="submit"
-            className="inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-full bg-[#b88a43] px-7 text-base font-bold text-[#fffdf8] shadow-[0_18px_50px_rgba(184,138,67,0.24)] transition hover:bg-[#d7bd83] hover:text-[#211b17] disabled:cursor-not-allowed disabled:opacity-45 md:w-auto"
+            className="inline-flex h-14 min-h-14 w-full items-center justify-center gap-3 rounded-full bg-[#b88a43] px-7 text-base font-bold text-[#fffdf8] shadow-[0_18px_50px_rgba(184,138,67,0.24)] transition hover:bg-[#d7bd83] hover:text-[#211b17] disabled:cursor-not-allowed disabled:opacity-45 md:w-auto"
             disabled={!canSubmit}
           >
             <Send className="h-4 w-4" aria-hidden="true" />
