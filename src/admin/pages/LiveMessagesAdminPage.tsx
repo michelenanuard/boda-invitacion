@@ -7,7 +7,7 @@ import {
 } from '../../services/liveMessagesService'
 import { EditableCard } from '../components/EditableCard'
 
-function formatMessageTime(createdAt: number) {
+function formatMessageTime(createdAt: string) {
   return new Intl.DateTimeFormat('es', {
     day: '2-digit',
     month: 'short',
@@ -19,7 +19,9 @@ function formatMessageTime(createdAt: number) {
 export function LiveMessagesAdminPage() {
   const { messages, settings, saveSettings } = useLiveMessages()
   const pendingMessages = messages.filter((message) => message.status === 'pending')
-  const visibleMessages = messages.filter((message) => message.status === 'approved')
+  const visibleMessages = messages.filter(
+    (message) => message.approved !== false && message.status !== 'hidden' && message.status !== 'pending',
+  )
 
   return (
     <div className="grid gap-6">

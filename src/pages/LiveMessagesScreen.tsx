@@ -3,11 +3,11 @@ import { Heart } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Monogram } from '../components/Monogram'
 import { getMessageLifeTime, LIVE_MESSAGES_CONFIG } from '../config/liveMessagesConfig'
-import { useLiveMessages } from '../hooks/useLiveMessages'
+import { useGuestMessages } from '../hooks/useGuestMessages'
 import { useWeddingContent } from '../hooks/useWeddingContent'
-import type { LiveGuestMessage } from '../services/liveMessagesService'
+import type { GuestMessage } from '../services/guestMessagesService'
 
-type VisibleMessage = LiveGuestMessage & {
+type VisibleMessage = GuestMessage & {
   slot: number
   shownAt: number
   expiresAt: number
@@ -35,7 +35,7 @@ function getInitials(name: string) {
     .join('')
 }
 
-function MessageAvatar({ message, className }: { message: LiveGuestMessage; className: string }) {
+function MessageAvatar({ message, className }: { message: GuestMessage; className: string }) {
   return (
     <div
       className={`grid shrink-0 place-items-center overflow-hidden rounded-full border border-[#b88a43]/38 bg-[#f3eadb] font-serif-display font-semibold text-[#b88a43] ${className}`}
@@ -128,16 +128,19 @@ function MobileMessageStack({ messages }: { messages: VisibleMessage[] }) {
 
 export function LiveMessagesScreen() {
   const { content } = useWeddingContent()
-  const { messages } = useLiveMessages()
+  const { messages } = useGuestMessages()
   const [visibleMessages, setVisibleMessages] = useState<VisibleMessage[]>([])
+  const [messageQueue, setMessageQueue] = useState<GuestMessage[]>([])
   const [hasProjectedMessages, setHasProjectedMessages] = useState(false)
-  const queuedMessages = useRef<LiveGuestMessage[]>([])
   const queuedMessageIds = useRef(new Set<string>())
   const projectedMessageIds = useRef(new Set<string>())
   const nextSlotIndex = useRef(0)
 
   const approvedMessages = useMemo(
-    () => messages.filter((message) => message.status === 'approved').sort((a, b) => a.createdAt - b.createdAt),
+    () =>
+      messages
+        .filter((message) => message.status !== 'hidden')
+        .sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt)),
     [messages],
   )
 
@@ -147,47 +150,58 @@ export function LiveMessagesScreen() {
     )
 
     newMessages.forEach((message) => {
-      queuedMessages.current.push(message)
       queuedMessageIds.current.add(message.id)
     })
+
+    if (newMessages.length > 0) {
+      setMessageQueue((currentQueue) => [...currentQueue, ...newMessages])
+    }
   }, [approvedMessages])
 
   useEffect(() => {
-    const queueInterval = window.setInterval(() => {
-      setVisibleMessages((currentMessages) => {
-        const now = Date.now()
-        const activeMessages = currentMessages.filter((message) => message.expiresAt > now)
-        const availableSlots = LIVE_MESSAGES_CONFIG.maxVisibleMessages - activeMessages.length
+    if (messageQueue.length === 0) {
+      return
+    }
 
-        if (availableSlots <= 0 || queuedMessages.current.length === 0) {
-          return activeMessages
+    const queueTimer = window.setTimeout(() => {
+      const now = Date.now()
+      const activeMessages = visibleMessages.filter((message) => message.expiresAt > now)
+      const availableSlots = LIVE_MESSAGES_CONFIG.maxVisibleMessages - activeMessages.length
+
+      if (availableSlots <= 0) {
+        if (activeMessages.length !== visibleMessages.length) {
+          setVisibleMessages(activeMessages)
         }
 
-        const nextMessages = queuedMessages.current.splice(0, availableSlots).map((message) => {
-          queuedMessageIds.current.delete(message.id)
-          projectedMessageIds.current.add(message.id)
+        return
+      }
 
-          const slot = displaySlotOrder[nextSlotIndex.current % displaySlotOrder.length]
-          nextSlotIndex.current += 1
+      const nextQueueMessages = messageQueue.slice(0, availableSlots)
+      const shownIds = new Set(nextQueueMessages.map((message) => message.id))
+      const nextMessages = nextQueueMessages.map((message) => {
+        queuedMessageIds.current.delete(message.id)
+        projectedMessageIds.current.add(message.id)
 
-          return {
-            ...message,
-            slot,
-            shownAt: now,
-            expiresAt: now + getMessageLifeTime(message.message),
-          }
-        })
+        const slot = displaySlotOrder[nextSlotIndex.current % displaySlotOrder.length]
+        nextSlotIndex.current += 1
 
-        if (nextMessages.length > 0) {
-          setHasProjectedMessages(true)
+        return {
+          ...message,
+          slot,
+          shownAt: now,
+          expiresAt: now + getMessageLifeTime(message.message),
         }
-
-        return [...activeMessages, ...nextMessages]
       })
-    }, LIVE_MESSAGES_CONFIG.queueIntervalMs)
 
-    return () => window.clearInterval(queueInterval)
-  }, [])
+      if (nextMessages.length > 0) {
+        setHasProjectedMessages(true)
+        setVisibleMessages([...activeMessages, ...nextMessages])
+        setMessageQueue((currentQueue) => currentQueue.filter((message) => !shownIds.has(message.id)))
+      }
+    }, LIVE_MESSAGES_CONFIG.entranceDelayMs)
+
+    return () => window.clearTimeout(queueTimer)
+  }, [messageQueue, visibleMessages])
 
   useEffect(() => {
     const cleanupInterval = window.setInterval(() => {

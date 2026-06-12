@@ -26,6 +26,8 @@ export function GuestMessagesPage() {
   const [message, setMessage] = useState('')
   const [photo, setPhoto] = useState('')
   const [status, setStatus] = useState('')
+  const [submitError, setSubmitError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const canSubmit = useMemo(() => name.trim().length >= 2 && message.trim().length >= 4, [message, name])
 
@@ -37,15 +39,29 @@ export function GuestMessagesPage() {
       return
     }
 
-    const nextMessage = saveGuestMessage({ name, message, photo: photo || undefined })
-    setName('')
-    setMessage('')
-    setPhoto('')
-    setStatus(
-      nextMessage.status === 'pending'
-        ? 'Gracias. Tu mensaje fue enviado y aparecerá cuando sea aprobado.'
-        : 'Gracias. Tu mensaje ya está listo para aparecer en pantalla.',
-    )
+    if (isSubmitting) {
+      return
+    }
+
+    setIsSubmitting(true)
+    setSubmitError('')
+
+    try {
+      const nextMessage = saveGuestMessage({ name, message, photo: photo || undefined })
+      setName('')
+      setMessage('')
+      setPhoto('')
+      setStatus(
+        nextMessage.status === 'pending'
+          ? 'Gracias. Tu mensaje fue enviado y aparecerá cuando sea aprobado.'
+          : 'Gracias. Tu mensaje ya está listo para aparecer en pantalla.',
+      )
+    } catch {
+      setStatus('')
+      setSubmitError('No pudimos guardar tu mensaje. Inténtalo de nuevo en unos segundos.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -134,15 +150,18 @@ export function GuestMessagesPage() {
           <button
             type="submit"
             className="inline-flex h-14 min-h-14 w-full items-center justify-center gap-3 rounded-full bg-[#b88a43] px-7 text-base font-bold text-[#fffdf8] shadow-[0_18px_50px_rgba(184,138,67,0.24)] transition hover:bg-[#d7bd83] hover:text-[#211b17] disabled:cursor-not-allowed disabled:opacity-45 md:w-auto"
-            disabled={!canSubmit}
+            disabled={!canSubmit || isSubmitting}
           >
             <Send className="h-4 w-4" aria-hidden="true" />
-            Enviar mensaje
+            {isSubmitting ? 'Enviando...' : 'Enviar mensaje'}
           </button>
         </form>
 
         {status ? (
           <p className="mx-auto mt-6 max-w-2xl text-center text-base leading-7 text-[#d7bd83]">{status}</p>
+        ) : null}
+        {submitError ? (
+          <p className="mx-auto mt-6 max-w-2xl text-center text-base leading-7 text-rose-200">{submitError}</p>
         ) : null}
 
         <div className="mt-8 flex justify-center">
