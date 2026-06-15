@@ -1,9 +1,25 @@
+import type { RealtimeChannel } from '@supabase/supabase-js'
 import { defaultWeddingContent } from '../data/weddingData'
+import { isSupabaseConfigured, supabase } from '../lib/supabaseClient'
 import type { WeddingContent } from '../types/wedding'
 
 export const WEDDING_CONTENT_STORAGE_KEY = 'wedding-invitation-content'
 export const WEDDING_CONTENT_BASE_SIGNATURE_KEY = 'wedding-invitation-content-base-signature'
 export const WEDDING_CONTENT_UPDATED_EVENT = 'wedding-content-updated'
+
+const SITE_CONTENT_TABLE = 'site_content'
+const SITE_CONTENT_ID = 'main'
+
+type SiteContentRow = {
+  id: string
+  content: WeddingContent | Partial<WeddingContent> | null
+  updated_at: string | null
+}
+
+export type PublishedWeddingContent = {
+  content: WeddingContent
+  updatedAt: string | null
+}
 
 function isQuotaExceededError(error: unknown) {
   return error instanceof DOMException && (error.name === 'QuotaExceededError' || error.name === 'NS_ERROR_DOM_QUOTA_REACHED')
@@ -19,6 +35,58 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 export function getDefaultWeddingContent(): WeddingContent {
   return cloneContent(defaultWeddingContent)
+}
+
+function normalizeWeddingContent(content: unknown): WeddingContent {
+  if (!isRecord(content)) {
+    return getDefaultWeddingContent()
+  }
+
+  return {
+    ...getDefaultWeddingContent(),
+    ...content,
+  } as WeddingContent
+}
+
+function createRealtimeChannelName(baseName: string) {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return `${baseName}:${crypto.randomUUID()}`
+  }
+
+  return `${baseName}:${Date.now()}:${Math.random().toString(36).slice(2)}`
+}
+
+function logWeddingContent(message: string, data?: unknown) {
+  if (import.meta.env.DEV) {
+    console.log(`[SupabaseContent] ${message}`, data ?? '')
+  }
+}
+
+function errorWeddingContent(message: string, error?: unknown) {
+  console.error(`[SupabaseContent] ${message}`, error ?? '')
+}
+
+function getContentUserMessage(error: unknown) {
+  const text = error instanceof Error ? error.message : String(error ?? '')
+  const lowerText = text.toLowerCase()
+
+  if (lowerText.includes('relation') && lowerText.includes('does not exist')) {
+    return 'La tabla site_content no existe en Supabase. Ejecuta el SQL de configuracion.'
+  }
+
+  if (lowerText.includes('row-level security') || lowerText.includes('permission denied')) {
+    return 'Supabase rechazo el cambio por permisos. Revisa las politicas RLS de site_content.'
+  }
+
+  return 'No se pudo guardar el contenido en Supabase.'
+}
+
+function getSupabaseClient() {
+  if (!supabase) {
+    throw new Error('Supabase no esta configurado. Revisa VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY.')
+  }
+
+  return supabase
 }
 
 function getBaseContentSignature() {
@@ -78,6 +146,40 @@ export function getWeddingContent(): WeddingContent {
   }
 }
 
+export async function getPublishedWeddingContent(): Promise<PublishedWeddingContent> {
+  if (!isSupabaseConfigured || !supabase) {
+    return {
+      content: getWeddingContent(),
+      updatedAt: null,
+    }
+  }
+
+  const { data, error } = await supabase
+    .from(SITE_CONTENT_TABLE)
+    .select('id, content, updated_at')
+    .eq('id', SITE_CONTENT_ID)
+    .maybeSingle()
+
+  if (error) {
+    errorWeddingContent('Error cargando contenido publicado', error)
+    throw new Error(getContentUserMessage(error))
+  }
+
+  if (!data) {
+    return {
+      content: getDefaultWeddingContent(),
+      updatedAt: null,
+    }
+  }
+
+  const row = data as SiteContentRow
+
+  return {
+    content: normalizeWeddingContent(row.content),
+    updatedAt: row.updated_at,
+  }
+}
+
 export function saveWeddingContent(content: WeddingContent) {
   try {
     window.localStorage.setItem(WEDDING_CONTENT_STORAGE_KEY, JSON.stringify(content))
@@ -92,6 +194,81 @@ export function saveWeddingContent(content: WeddingContent) {
     }
 
     throw error
+  }
+}
+
+export async function savePublishedWeddingContent(content: WeddingContent): Promise<PublishedWeddingContent> {
+  const normalizedContent = normalizeWeddingContent(content)
+  saveWeddingContent(normalizedContent)
+
+  if (!isSupabaseConfigured || !supabase) {
+    logWeddingContent('Contenido guardado en fallback localStorage')
+    return {
+      content: normalizedContent,
+      updatedAt: new Date().toISOString(),
+    }
+  }
+
+  const client = getSupabaseClient()
+  const { data, error } = await client
+    .from(SITE_CONTENT_TABLE)
+    .upsert({
+      id: SITE_CONTENT_ID,
+      content: normalizedContent,
+      updated_at: new Date().toISOString(),
+    })
+    .select('id, content, updated_at')
+    .single()
+
+  if (error || !data) {
+    errorWeddingContent('Error guardando contenido publicado', error)
+    throw new Error(getContentUserMessage(error))
+  }
+
+  const row = data as SiteContentRow
+  const publishedContent = {
+    content: normalizeWeddingContent(row.content),
+    updatedAt: row.updated_at,
+  }
+
+  window.dispatchEvent(new CustomEvent(WEDDING_CONTENT_UPDATED_EVENT, { detail: publishedContent.content }))
+  logWeddingContent('Contenido publicado guardado', { updatedAt: publishedContent.updatedAt })
+  return publishedContent
+}
+
+export function subscribeToPublishedWeddingContent(callback: (content: PublishedWeddingContent) => void) {
+  if (!isSupabaseConfigured || !supabase) {
+    return () => undefined
+  }
+
+  const client = getSupabaseClient()
+  const channel: RealtimeChannel = client
+    .channel(createRealtimeChannelName('site_content_realtime'))
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: SITE_CONTENT_TABLE,
+        filter: `id=eq.${SITE_CONTENT_ID}`,
+      },
+      (payload) => {
+        const row = payload.new as SiteContentRow
+        const nextContent = {
+          content: normalizeWeddingContent(row.content),
+          updatedAt: row.updated_at,
+        }
+
+        logWeddingContent('Realtime recibido para contenido publicado', { updatedAt: nextContent.updatedAt })
+        callback(nextContent)
+      },
+    )
+    .subscribe((status) => {
+      logWeddingContent('Estado realtime contenido publicado', status)
+    })
+
+  return () => {
+    void client.removeChannel(channel)
   }
 }
 

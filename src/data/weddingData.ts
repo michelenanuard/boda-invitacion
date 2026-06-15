@@ -157,6 +157,7 @@ export const weddingData: WeddingData = {
       }
     ]
   },
+  "liveMessagesEnabled": false,
   "contact": {
     "email": "MARCOSMICHELEN57@gmail.com",
     "phone": "+18098795511",

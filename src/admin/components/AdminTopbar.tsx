@@ -3,11 +3,28 @@ import { ExternalLink, Save } from 'lucide-react'
 type AdminTopbarProps = {
   title: string
   isDirty: boolean
+  isSaving: boolean
+  contentUpdatedAt: string | null
   saveError: string
-  onSave: () => void
+  onSave: () => void | Promise<void>
 }
 
-export function AdminTopbar({ title, isDirty, saveError, onSave }: AdminTopbarProps) {
+function formatUpdatedAt(value: string | null) {
+  if (!value) {
+    return null
+  }
+
+  return new Intl.DateTimeFormat('es', {
+    day: '2-digit',
+    month: 'short',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(new Date(value))
+}
+
+export function AdminTopbar({ title, isDirty, isSaving, contentUpdatedAt, saveError, onSave }: AdminTopbarProps) {
+  const updatedAtLabel = formatUpdatedAt(contentUpdatedAt)
+
   return (
     <header className="sticky top-0 z-20 border-b border-stone-200 bg-[#f8f3ea]/90 px-5 py-4 backdrop-blur md:px-8">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -26,6 +43,11 @@ export function AdminTopbar({ title, isDirty, saveError, onSave }: AdminTopbarPr
               Cambios sin guardar
             </span>
           ) : null}
+          {updatedAtLabel ? (
+            <span className="inline-flex min-h-10 items-center rounded-full bg-stone-100 px-4 text-sm font-semibold text-stone-700">
+              Ultima actualizacion: {updatedAtLabel}
+            </span>
+          ) : null}
           <a
             href="/"
             target="_blank"
@@ -38,11 +60,11 @@ export function AdminTopbar({ title, isDirty, saveError, onSave }: AdminTopbarPr
           <button
             type="button"
             className="inline-flex min-h-10 items-center gap-2 rounded-full bg-[#211b17] px-4 text-sm font-bold text-white disabled:opacity-45"
-            disabled={!isDirty}
+            disabled={!isDirty || isSaving}
             onClick={onSave}
           >
             <Save className="h-4 w-4" />
-            Guardar cambios
+            {isSaving ? 'Guardando...' : 'Guardar cambios'}
           </button>
         </div>
       </div>

@@ -39,13 +39,27 @@ export function AdminApp() {
   const navigate = useNavigate()
   const location = useLocation()
   const { logout: logoutSession } = useAdminAuth()
-  const { content, saveContent } = useWeddingContent()
+  const { content, saveContent, loading: loadingContent, updatedAt: contentUpdatedAt, error: contentLoadError } = useWeddingContent()
   const [draft, setDraft] = useState<WeddingContent>(content)
   const [savedMessage, setSavedMessage] = useState('')
   const [saveError, setSaveError] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
+  const [hasLocalEdits, setHasLocalEdits] = useState(false)
 
-  const isDirty = useMemo(() => JSON.stringify(draft) !== JSON.stringify(content), [content, draft])
+  const isDirty = useMemo(() => hasLocalEdits && JSON.stringify(draft) !== JSON.stringify(content), [content, draft, hasLocalEdits])
   const pageTitle = pageTitles[location.pathname] ?? 'Administrador'
+
+  useEffect(() => {
+    if (!hasLocalEdits) {
+      setDraft(content)
+    }
+  }, [content, hasLocalEdits])
+
+  useEffect(() => {
+    if (contentLoadError) {
+      setSaveError(contentLoadError)
+    }
+  }, [contentLoadError])
 
   useEffect(() => {
     const preventUnload = (event: BeforeUnloadEvent) => {
@@ -60,20 +74,25 @@ export function AdminApp() {
     return () => window.removeEventListener('beforeunload', preventUnload)
   }, [isDirty])
 
-  const saveDraft = () => {
+  const saveDraft = async () => {
     try {
-      saveContent(draft)
+      setIsSaving(true)
+      await saveContent(draft)
+      setHasLocalEdits(false)
       setSaveError('')
       setSavedMessage('Cambios guardados correctamente')
       window.setTimeout(() => setSavedMessage(''), 2500)
     } catch (error) {
       setSavedMessage('')
       setSaveError(error instanceof Error ? error.message : 'No se pudieron guardar los cambios.')
+    } finally {
+      setIsSaving(false)
     }
   }
 
   const updateDraft = (nextDraft: WeddingContent) => {
     setSaveError('')
+    setHasLocalEdits(true)
     setDraft(nextDraft)
   }
 
@@ -88,7 +107,18 @@ export function AdminApp() {
 
   return (
     <AdminContext.Provider
-      value={{ draft, updateDraft, saveDraft, pageTitle, isDirty, savedMessage, saveError, logout }}
+      value={{
+        draft,
+        updateDraft,
+        saveDraft,
+        pageTitle,
+        isDirty: loadingContent ? false : isDirty,
+        isSaving,
+        contentUpdatedAt,
+        savedMessage,
+        saveError,
+        logout,
+      }}
     >
       <Routes>
         <Route element={<AdminLayout />}>

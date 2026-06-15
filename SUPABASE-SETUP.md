@@ -74,7 +74,101 @@ alter publication supabase_realtime add table public.guest_messages;
 
 Si Supabase indica que la tabla ya esta agregada, no necesitas repetirlo.
 
-## 4. Copiar URL y anon key
+## 4. Crear configuracion online para habilitar Mensajes
+
+La opcion del admin **Mostrar Mensajes en la web** usa una tabla pequena para poder habilitar u ocultar `/mensajes` sin hacer build.
+
+En **SQL Editor**, ejecuta:
+
+```sql
+create table if not exists public.site_settings (
+  id text primary key,
+  live_messages_enabled boolean not null default false,
+  updated_at timestamptz default now()
+);
+
+insert into public.site_settings (id, live_messages_enabled)
+values ('main', false)
+on conflict (id) do nothing;
+
+alter table public.site_settings enable row level security;
+
+create policy "Anyone can read site settings"
+on public.site_settings
+for select
+to anon
+using (true);
+
+create policy "Anyone can update site settings"
+on public.site_settings
+for insert
+to anon
+with check (id = 'main');
+
+create policy "Anyone can edit site settings"
+on public.site_settings
+for update
+to anon
+using (id = 'main')
+with check (id = 'main');
+```
+
+Luego activa Realtime para esta tabla:
+
+```sql
+alter publication supabase_realtime add table public.site_settings;
+```
+
+Si Supabase indica que la tabla ya esta agregada, no necesitas repetirlo.
+
+## 5. Crear contenido editable online
+
+El admin puede guardar los textos y configuraciones editables en Supabase para que la web publica se actualice sin recompilar.
+
+En **SQL Editor**, ejecuta:
+
+```sql
+create table if not exists public.site_content (
+  id text primary key,
+  content jsonb not null,
+  updated_at timestamptz default now()
+);
+
+insert into public.site_content (id, content)
+values ('main', '{}'::jsonb)
+on conflict (id) do nothing;
+
+alter table public.site_content enable row level security;
+
+create policy "Anyone can read site content"
+on public.site_content
+for select
+to anon
+using (id = 'main');
+
+create policy "Anyone can create site content"
+on public.site_content
+for insert
+to anon
+with check (id = 'main');
+
+create policy "Anyone can edit site content"
+on public.site_content
+for update
+to anon
+using (id = 'main')
+with check (id = 'main');
+```
+
+Luego activa Realtime para esta tabla:
+
+```sql
+alter publication supabase_realtime add table public.site_content;
+```
+
+Si Supabase indica que la tabla ya esta agregada, no necesitas repetirlo.
+
+## 6. Copiar URL y anon key
 
 En Supabase:
 
@@ -84,7 +178,7 @@ En Supabase:
    - **Project URL**
    - **anon public key**
 
-## 5. Configurar variables locales
+## 7. Configurar variables locales
 
 Crea un archivo `.env` en la raiz del proyecto:
 
@@ -95,7 +189,7 @@ VITE_SUPABASE_ANON_KEY=tu_anon_public_key
 
 No subas `.env` al repositorio.
 
-## 6. Configurar variables en Netlify
+## 8. Configurar variables en Netlify
 
 En Netlify:
 
@@ -112,14 +206,14 @@ VITE_SUPABASE_ANON_KEY
 5. Guarda los cambios.
 6. Vuelve a desplegar el sitio.
 
-## 7. Compilar y publicar
+## 9. Compilar y publicar
 
 ```bash
 npm run build
 netlify deploy --prod --dir=dist
 ```
 
-## 8. Probar en local
+## 10. Probar en local
 
 Con Supabase configurado:
 
@@ -139,24 +233,25 @@ Sin Supabase configurado:
 3. El sistema usa `localStorage` como fallback para desarrollo local.
 4. El fallback no sincroniza entre dispositivos reales.
 
-## 9. Probar en Netlify con celular y laptop
+## 11. Probar en Netlify con celular y laptop
 
-1. En la laptop o proyector abre:
+1. En el admin, entra a **Mensajes en vivo** y activa **Mostrar Mensajes en la web**.
+2. En la laptop o proyector abre:
 
 ```text
 https://anakary-marcos.netlify.app/pantalla-mensajes
 ```
 
-2. En el celular abre:
+3. En el celular abre:
 
 ```text
 https://anakary-marcos.netlify.app/mensajes
 ```
 
-3. Envia un mensaje desde el celular.
-4. Debe aparecer en la laptop sin refrescar.
+4. Envia un mensaje desde el celular.
+5. Debe aparecer en la laptop sin refrescar.
 
-## 10. Logs de desarrollo
+## 12. Logs de desarrollo
 
 En desarrollo veras logs con el prefijo:
 

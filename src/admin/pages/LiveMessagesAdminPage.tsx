@@ -1,4 +1,5 @@
 import { Check, ExternalLink, EyeOff, MonitorUp, Trash2 } from 'lucide-react'
+import { useSiteSettings } from '../../hooks/useSiteSettings'
 import { useLiveMessages } from '../../hooks/useLiveMessages'
 import {
   clearLiveMessages,
@@ -6,6 +7,7 @@ import {
   updateLiveMessageStatus,
 } from '../../services/liveMessagesService'
 import { EditableCard } from '../components/EditableCard'
+import { useAdminEditor } from '../hooks/useAdminEditor'
 
 function formatMessageTime(createdAt: string) {
   return new Intl.DateTimeFormat('es', {
@@ -17,6 +19,13 @@ function formatMessageTime(createdAt: string) {
 }
 
 export function LiveMessagesAdminPage() {
+  const { draft } = useAdminEditor()
+  const {
+    settings: siteSettings,
+    saving: savingSiteSettings,
+    error: siteSettingsError,
+    saveSettings: saveSiteSettings,
+  } = useSiteSettings(draft.liveMessagesEnabled === true)
   const { messages, settings, saveSettings } = useLiveMessages()
   const pendingMessages = messages.filter((message) => message.status === 'pending')
   const visibleMessages = messages.filter(
@@ -29,7 +38,19 @@ export function LiveMessagesAdminPage() {
         title="Mensajes en vivo"
         description="Administra la pantalla que se proyectará durante la celebración."
       >
-        <div className="grid gap-4 lg:grid-cols-[1fr_auto_auto] lg:items-center">
+        <div className="grid gap-4 lg:grid-cols-[1fr_1fr_auto_auto] lg:items-center">
+          <label className="flex items-center gap-3 rounded-[8px] border border-stone-200 bg-stone-50 p-4 text-sm font-semibold text-stone-800">
+            <input
+              checked={siteSettings.liveMessagesEnabled}
+              disabled={savingSiteSettings}
+              type="checkbox"
+              onChange={(event) => {
+                void saveSiteSettings({ liveMessagesEnabled: event.target.checked })
+              }}
+            />
+            Mostrar Mensajes en la web
+          </label>
+
           <label className="flex items-center gap-3 rounded-[8px] border border-stone-200 bg-stone-50 p-4 text-sm font-semibold text-stone-800">
             <input
               checked={settings.moderationEnabled}
@@ -75,6 +96,9 @@ export function LiveMessagesAdminPage() {
               Formulario
             </a>
           </div>
+          {siteSettingsError ? (
+            <p className="text-sm font-semibold text-rose-700">{siteSettingsError}</p>
+          ) : null}
         </div>
       </EditableCard>
 

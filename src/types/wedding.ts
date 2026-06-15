@@ -104,6 +104,7 @@ export type WeddingData = {
   testimonials: Testimonial[]
   faq: FAQItem[]
   rsvp: RSVPContent
+  liveMessagesEnabled?: boolean
   contact: WeddingContact
   socialLinks: SocialLink[]
   theme: WeddingTheme

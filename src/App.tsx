@@ -15,10 +15,11 @@ import { Testimonials } from './components/Testimonials'
 import { GuestMessagesPage } from './pages/GuestMessagesPage'
 import { LiveMessagesScreen } from './pages/LiveMessagesScreen'
 import { useAdminAuth } from './admin/hooks/useAdminAuth'
+import { useSiteSettings } from './hooks/useSiteSettings'
 import { useWeddingContent } from './hooks/useWeddingContent'
 import type { CSSProperties } from 'react'
 
-function InvitationPage() {
+function InvitationPage({ liveMessagesEnabled }: { liveMessagesEnabled: boolean }) {
   const { content } = useWeddingContent()
   const themeStyle = {
     '--color-ivory': content.theme.ivory,
@@ -35,6 +36,7 @@ function InvitationPage() {
         brideName={content.brideName}
         groomName={content.groomName}
         coupleDisplayName={content.coupleDisplayName}
+        liveMessagesEnabled={liveMessagesEnabled}
       />
       <main>
         <Hero data={content} />
@@ -68,10 +70,18 @@ function ProtectedAdminRoute() {
 }
 
 function App() {
+  const { content } = useWeddingContent()
+  const { settings, loading: loadingSiteSettings } = useSiteSettings(content.liveMessagesEnabled === true)
+
   return (
     <Routes>
-      <Route path="/" element={<InvitationPage />} />
-      <Route path="/mensajes" element={<GuestMessagesPage />} />
+      <Route path="/" element={<InvitationPage liveMessagesEnabled={settings.liveMessagesEnabled} />} />
+      <Route
+        path="/mensajes"
+        element={
+          loadingSiteSettings ? null : settings.liveMessagesEnabled ? <GuestMessagesPage /> : <Navigate to="/" replace />
+        }
+      />
       <Route path="/pantalla-mensajes" element={<LiveMessagesScreen />} />
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/admin/*" element={<ProtectedAdminRoute />} />

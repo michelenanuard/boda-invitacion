@@ -6,6 +6,7 @@ interface HeaderProps {
   brideName: string
   groomName: string
   coupleDisplayName: string
+  liveMessagesEnabled?: boolean
 }
 
 const leftNavItems = [
@@ -21,9 +22,12 @@ const rightNavItems = [
   { label: 'RSVP', href: '#rsvp' },
 ]
 
-export function Header({ brideName, groomName, coupleDisplayName }: HeaderProps) {
+export function Header({ brideName, groomName, coupleDisplayName, liveMessagesEnabled = false }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const navItems = [...leftNavItems, ...rightNavItems]
+  const visibleRightNavItems = liveMessagesEnabled
+    ? rightNavItems
+    : rightNavItems.filter((item) => item.href !== '/mensajes')
+  const navItems = [...leftNavItems, ...visibleRightNavItems]
 
   const closeMenu = () => setIsOpen(false)
 
@@ -48,7 +52,7 @@ export function Header({ brideName, groomName, coupleDisplayName }: HeaderProps)
         </a>
 
         <nav className="hidden items-center gap-6 pl-8 text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-[#6f655d] lg:flex">
-          {rightNavItems.map((item) => (
+          {visibleRightNavItems.map((item) => (
             <a key={item.href} href={item.href} className="transition-colors hover:text-[#b88a43]">
               {item.label}
             </a>

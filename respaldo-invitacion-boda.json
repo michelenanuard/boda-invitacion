@@ -184,5 +184,6 @@
     "gold": "#b88a43",
     "ink": "#211b17",
     "muted": "#6f655d"
-  }
+  },
+  "liveMessagesEnabled": false
 }

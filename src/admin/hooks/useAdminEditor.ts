@@ -4,9 +4,11 @@ import type { WeddingContent } from '../../types/wedding'
 export type AdminEditorContext = {
   draft: WeddingContent
   updateDraft: (content: WeddingContent) => void
-  saveDraft: () => void
+  saveDraft: () => Promise<void>
   pageTitle: string
   isDirty: boolean
+  isSaving: boolean
+  contentUpdatedAt: string | null
   savedMessage: string
   saveError: string
   logout: () => void
