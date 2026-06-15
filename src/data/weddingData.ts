@@ -158,8 +158,8 @@ export const weddingData: WeddingData = {
     ]
   },
   "contact": {
-    "email": "confirmaciones@ameliayjames.com",
-    "phone": "+1 809 555 0184",
+    "email": "MARCOSMICHELEN57@gmail.com",
+    "phone": "+18098795511",
     "location": "Santo Domingo, República Dominicana"
   },
   "socialLinks": [

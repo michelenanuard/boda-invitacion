@@ -49,7 +49,7 @@ function InvitationPage() {
         <StoryTimeline story={content.story} />
         <Gallery images={content.gallery} video={content.galleryVideo} />
         <Testimonials testimonials={content.testimonials} />
-        <RSVPForm content={content.rsvp} />
+        <RSVPForm content={content.rsvp} contactPhone={content.contact.phone} coupleDisplayName={content.coupleDisplayName} />
         <FAQ items={content.faq} />
       </main>
       <Footer data={content} />

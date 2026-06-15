@@ -2,6 +2,7 @@ import { defaultWeddingContent } from '../data/weddingData'
 import type { WeddingContent } from '../types/wedding'
 
 export const WEDDING_CONTENT_STORAGE_KEY = 'wedding-invitation-content'
+export const WEDDING_CONTENT_BASE_SIGNATURE_KEY = 'wedding-invitation-content-base-signature'
 export const WEDDING_CONTENT_UPDATED_EVENT = 'wedding-content-updated'
 
 function isQuotaExceededError(error: unknown) {
@@ -20,6 +21,19 @@ export function getDefaultWeddingContent(): WeddingContent {
   return cloneContent(defaultWeddingContent)
 }
 
+function getBaseContentSignature() {
+  return JSON.stringify({
+    coupleDisplayName: defaultWeddingContent.coupleDisplayName,
+    weddingDate: defaultWeddingContent.weddingDate,
+    weddingTime: defaultWeddingContent.weddingTime,
+    heroTitle: defaultWeddingContent.heroTitle,
+    heroSubtitle: defaultWeddingContent.heroSubtitle,
+    galleryCount: defaultWeddingContent.gallery.length,
+    storyCount: defaultWeddingContent.story.length,
+    faqCount: defaultWeddingContent.faq.length,
+  })
+}
+
 export function getWeddingContent(): WeddingContent {
   if (typeof window === 'undefined') {
     return getDefaultWeddingContent()
@@ -29,6 +43,17 @@ export function getWeddingContent(): WeddingContent {
 
   if (import.meta.env.PROD && !isAdminRoute) {
     return getDefaultWeddingContent()
+  }
+
+  const baseContentSignature = getBaseContentSignature()
+  const storedBaseContentSignature = window.localStorage.getItem(WEDDING_CONTENT_BASE_SIGNATURE_KEY)
+
+  if (storedBaseContentSignature && storedBaseContentSignature !== baseContentSignature) {
+    window.localStorage.removeItem(WEDDING_CONTENT_STORAGE_KEY)
+  }
+
+  if (!storedBaseContentSignature || storedBaseContentSignature !== baseContentSignature) {
+    window.localStorage.setItem(WEDDING_CONTENT_BASE_SIGNATURE_KEY, baseContentSignature)
   }
 
   const rawContent = window.localStorage.getItem(WEDDING_CONTENT_STORAGE_KEY)
@@ -56,6 +81,7 @@ export function getWeddingContent(): WeddingContent {
 export function saveWeddingContent(content: WeddingContent) {
   try {
     window.localStorage.setItem(WEDDING_CONTENT_STORAGE_KEY, JSON.stringify(content))
+    window.localStorage.setItem(WEDDING_CONTENT_BASE_SIGNATURE_KEY, getBaseContentSignature())
     window.dispatchEvent(new CustomEvent(WEDDING_CONTENT_UPDATED_EVENT, { detail: content }))
   } catch (error) {
     if (isQuotaExceededError(error)) {
@@ -71,6 +97,7 @@ export function saveWeddingContent(content: WeddingContent) {
 
 export function resetWeddingContent() {
   window.localStorage.removeItem(WEDDING_CONTENT_STORAGE_KEY)
+  window.localStorage.setItem(WEDDING_CONTENT_BASE_SIGNATURE_KEY, getBaseContentSignature())
   window.dispatchEvent(new CustomEvent(WEDDING_CONTENT_UPDATED_EVENT, { detail: getDefaultWeddingContent() }))
 }
 

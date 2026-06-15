@@ -49,14 +49,39 @@ function isLocalHost() {
   return ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname)
 }
 
+function getWhatsAppPhone(phone: string) {
+  return phone.replace(/[^\d]/g, '')
+}
+
+function getAttendanceLabel(value: string, content: RSVPContent) {
+  return content.attendanceOptions.find((option) => option.value === value)?.label ?? value
+}
+
+function createWhatsAppMessage(values: FormValues, content: RSVPContent, coupleDisplayName: string) {
+  const lines = [
+    `Hola, quiero confirmar mi asistencia para la boda de ${coupleDisplayName}.`,
+    '',
+    `Nombre: ${values.name.trim()}`,
+    values.phone.trim() ? `Telefono: ${values.phone.trim()}` : '',
+    `Email: ${values.email.trim()}`,
+    `Asistencia: ${getAttendanceLabel(values.attending, content)}`,
+    `Cantidad de invitados: ${values.guests.trim()}`,
+    values.message.trim() ? `Mensaje: ${values.message.trim()}` : '',
+  ].filter(Boolean)
+
+  return lines.join('\n')
+}
+
 type RSVPFormProps = {
   content: RSVPContent
+  contactPhone: string
+  coupleDisplayName: string
 }
 
 const fieldClassName =
   'min-h-12 w-full rounded-[8px] border border-[#b88a43]/18 bg-[#fffdf8] px-4 py-3 text-base text-[#211b17] outline-none transition placeholder:text-[#6f655d]/55 focus:border-[#b88a43] focus:ring-4 focus:ring-[#b88a43]/12'
 
-export function RSVPForm({ content }: RSVPFormProps) {
+export function RSVPForm({ content, contactPhone, coupleDisplayName }: RSVPFormProps) {
   const [values, setValues] = useState<FormValues>(initialValues)
   const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({})
   const [submitted, setSubmitted] = useState(false)
@@ -81,6 +106,14 @@ export function RSVPForm({ content }: RSVPFormProps) {
       return
     }
 
+    const whatsAppPhone = getWhatsAppPhone(contactPhone)
+
+    if (!whatsAppPhone) {
+      setSubmitted(false)
+      setSubmitError('No pudimos abrir WhatsApp porque falta el numero de contacto.')
+      return
+    }
+
     if (!isLocalHost()) {
       try {
         const formData = new FormData(event.currentTarget)
@@ -102,6 +135,11 @@ export function RSVPForm({ content }: RSVPFormProps) {
       }
     }
 
+    const whatsAppUrl = `https://wa.me/${whatsAppPhone}?text=${encodeURIComponent(
+      createWhatsAppMessage(values, content, coupleDisplayName),
+    )}`
+
+    window.open(whatsAppUrl, '_blank', 'noopener,noreferrer')
     setSubmitted(true)
     setValues(initialValues)
   }
