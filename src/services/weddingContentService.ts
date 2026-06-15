@@ -25,6 +25,12 @@ export function getWeddingContent(): WeddingContent {
     return getDefaultWeddingContent()
   }
 
+  const isAdminRoute = window.location.pathname.startsWith('/admin')
+
+  if (import.meta.env.PROD && !isAdminRoute) {
+    return getDefaultWeddingContent()
+  }
+
   const rawContent = window.localStorage.getItem(WEDDING_CONTENT_STORAGE_KEY)
 
   if (!rawContent) {
