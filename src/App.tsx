@@ -41,7 +41,6 @@ function InvitationPage({ liveMessagesEnabled }: { liveMessagesEnabled: boolean 
       />
       <main>
         <Hero data={content} />
-        <WeddingGifts gifts={content.gifts} />
         <EventDetails ceremony={content.ceremony} reception={content.reception} />
         <Countdown
           weddingDate={content.weddingDate}
@@ -49,6 +48,7 @@ function InvitationPage({ liveMessagesEnabled }: { liveMessagesEnabled: boolean 
           coupleDisplayName={content.coupleDisplayName}
           ceremony={content.ceremony}
         />
+        <WeddingGifts gifts={content.gifts} />
         <Couple bride={content.bride} groom={content.groom} />
         <StoryTimeline story={content.story} />
         <Gallery images={content.gallery} video={content.galleryVideo} />

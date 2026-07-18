@@ -1,4 +1,4 @@
-import { CalendarDays, ExternalLink, Image, MonitorUp, Palette, Send } from 'lucide-react'
+import { CalendarDays, ExternalLink, Gift, Image, MonitorUp, Palette, Send } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAdminEditor } from './hooks/useAdminEditor'
 
@@ -10,6 +10,8 @@ function completionScore(content: ReturnType<typeof useAdminEditor>['draft']) {
     content.heroImage,
     content.ceremony.venue,
     content.reception.venue,
+    content.gifts.bank,
+    content.gifts.registryUrl,
     content.gallery.length > 0 ? 'gallery' : '',
     content.faq.length > 0 ? 'faq' : '',
   ]
@@ -25,6 +27,7 @@ export function AdminDashboard() {
     { label: 'Editar portada', href: '/admin/hero', icon: Image },
     { label: 'Editar fecha', href: '/admin/general', icon: CalendarDays },
     { label: 'Editar galería', href: '/admin/gallery', icon: Image },
+    { label: 'Regalos de Boda', href: '/admin/gifts', icon: Gift },
     { label: 'Mensajes en vivo', href: '/admin/live-messages', icon: MonitorUp },
     { label: 'Estilo visual', href: '/admin/theme', icon: Palette },
   ]

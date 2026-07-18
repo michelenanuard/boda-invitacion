@@ -15,7 +15,7 @@ export function Testimonials({ testimonials }: TestimonialsProps) {
         description="Con el amor de nuestras familias, compartimos unas palabras que atesoraremos por siempre."
       />
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2 lg:gap-8">
         {testimonials.slice(0, 3).map((testimonial) => (
           <article
             key={`${testimonial.name}-${testimonial.relation}`}

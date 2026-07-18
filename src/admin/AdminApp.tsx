@@ -18,12 +18,14 @@ import { PreviewPage } from './pages/PreviewPage'
 import { StoryEditorPage } from './pages/StoryEditorPage'
 import { TestimonialsEditorPage } from './pages/TestimonialsEditorPage'
 import { ThemeEditorPage } from './pages/ThemeEditorPage'
+import { WeddingGiftsEditorPage } from './pages/WeddingGiftsEditorPage'
 
 const pageTitles: Record<string, string> = {
   '/admin': 'Inicio',
   '/admin/general': 'Datos generales',
   '/admin/hero': 'Portada',
   '/admin/events': 'Ceremonia y recepción',
+  '/admin/gifts': 'Regalos de Boda',
   '/admin/couple': 'Los novios',
   '/admin/story': 'Nuestra historia',
   '/admin/gallery': 'Galería',
@@ -126,6 +128,7 @@ export function AdminApp() {
           <Route path="general" element={<GeneralSettingsPage />} />
           <Route path="hero" element={<HeroEditorPage />} />
           <Route path="events" element={<EventDetailsEditorPage />} />
+          <Route path="gifts" element={<WeddingGiftsEditorPage />} />
           <Route path="couple" element={<CoupleEditorPage />} />
           <Route path="story" element={<StoryEditorPage />} />
           <Route path="gallery" element={<GalleryEditorPage />} />

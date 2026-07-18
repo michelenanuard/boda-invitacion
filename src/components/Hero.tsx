@@ -1,4 +1,4 @@
-import { Calendar, MapPin } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 import type { WeddingData } from '../types/wedding'
 import { Monogram } from './Monogram'
 
@@ -8,28 +8,10 @@ type HeroProps = {
 
 type HeroInvitationCardProps = {
   data: WeddingData
-  formattedDate: string
   className?: string
 }
 
-function formatWeddingDate(date: string, time: string) {
-  const parsedDate = new Date(`${date}T${time}`)
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return [date, time].filter(Boolean).join(' · ')
-  }
-
-  return new Intl.DateTimeFormat('es', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(parsedDate)
-}
-
-function HeroInvitationCard({ data, formattedDate, className = '' }: HeroInvitationCardProps) {
+function HeroInvitationCard({ data, className = '' }: HeroInvitationCardProps) {
   return (
     <div
       className={`reveal-soft luxury-card relative mx-auto w-full max-w-md flex-col items-center overflow-hidden rounded-[8px] p-5 text-center text-[#211b17] sm:p-8 ${className}`}
@@ -40,21 +22,18 @@ function HeroInvitationCard({ data, formattedDate, className = '' }: HeroInvitat
         Invitación formal
       </p>
       <p className="mx-auto mt-4 max-w-[17.5rem] text-center font-serif-display text-[1.75rem] font-semibold leading-tight text-[#211b17] sm:max-w-[20rem] sm:text-4xl">
-        Te esperamos para celebrar nuestro inicio.
+        Será un honor compartir este momento juntos.
       </p>
       <div className="my-7 h-px w-full bg-[#b88a43]/20" />
-      <p className="flex flex-wrap items-center justify-center gap-3 text-center text-xs font-semibold uppercase leading-6 tracking-[0.14em] text-[#394136] sm:text-sm sm:tracking-[0.18em]">
-        <Calendar className="h-4 w-4 text-[#b88a43]" aria-hidden="true" />
-        {formattedDate}
+      <p className="flex max-w-sm items-center justify-center gap-3 text-center text-sm font-semibold leading-6 text-[#394136] sm:text-base">
+        <MapPin className="h-4 w-4 shrink-0 text-[#b88a43]" aria-hidden="true" />
+        Renaissance Santo Domingo Jaragua Hotel
       </p>
-      <p className="mt-3 text-sm leading-7 text-[#6f655d]">{data.ceremony.venue}</p>
     </div>
   )
 }
 
 export function Hero({ data }: HeroProps) {
-  const formattedDate = data.displayDate || formatWeddingDate(data.weddingDate, data.weddingTime)
-
   return (
     <section id="inicio" className="paper-texture px-4 pb-16 pt-8 sm:px-6 sm:pb-20 sm:pt-10 md:px-8 md:pb-28">
       <div className="mx-auto max-w-[1500px]">
@@ -85,26 +64,11 @@ export function Hero({ data }: HeroProps) {
               </p>
             </div>
 
-            <div className="reveal-soft luxury-card relative mx-auto hidden w-full max-w-md flex-col items-center overflow-hidden rounded-[8px] p-5 text-center text-[#211b17] sm:p-8 lg:mr-0 lg:flex">
-              <div className="absolute inset-x-5 top-5 h-px bg-gradient-to-r from-transparent via-[#b88a43]/45 to-transparent" />
-              <Monogram brideName={data.brideName} groomName={data.groomName} className="mx-auto h-16 w-16 text-[0.72rem]" />
-              <p className="mt-6 text-xs font-semibold uppercase tracking-[0.28em] text-[#b88a43]">
-                Invitación formal
-              </p>
-              <p className="mx-auto mt-4 max-w-[17.5rem] text-center font-serif-display text-[1.75rem] font-semibold leading-tight text-[#211b17] sm:max-w-[20rem] sm:text-4xl">
-                Te esperamos para celebrar nuestro inicio.
-              </p>
-              <div className="my-7 h-px w-full bg-[#b88a43]/20" />
-              <p className="flex flex-wrap items-center justify-center gap-3 text-center text-xs font-semibold uppercase leading-6 tracking-[0.14em] text-[#394136] sm:text-sm sm:tracking-[0.18em]">
-                <Calendar className="h-4 w-4 text-[#b88a43]" aria-hidden="true" />
-                {formattedDate}
-              </p>
-              <p className="mt-3 text-sm leading-7 text-[#6f655d]">{data.ceremony.venue}</p>
-            </div>
+            <HeroInvitationCard data={data} className="hidden lg:mr-0 lg:flex" />
           </div>
         </div>
 
-        <HeroInvitationCard data={data} formattedDate={formattedDate} className="mt-5 flex lg:hidden" />
+        <HeroInvitationCard data={data} className="mt-5 flex lg:hidden" />
 
         <div className="reveal-soft mx-auto mt-7 flex max-w-xl flex-col items-center justify-center gap-3 sm:mt-8 sm:flex-row">
           <a
