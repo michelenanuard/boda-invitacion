@@ -46,18 +46,36 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function deepMerge<T>(base: T, override: unknown): T {
-  if (!isRecord(base) || !isRecord(override)) {
-    return (override === undefined ? base : override) as T
+  if (Array.isArray(base)) {
+    return (Array.isArray(override) ? override : base) as T
   }
 
-  const result: Record<string, unknown> = { ...base }
+  if (isRecord(base)) {
+    if (!isRecord(override)) {
+      return base
+    }
 
-  for (const [key, value] of Object.entries(override)) {
-    const baseValue = result[key]
-    result[key] = isRecord(baseValue) && isRecord(value) ? deepMerge(baseValue, value) : value
+    const result: Record<string, unknown> = { ...base }
+
+    for (const [key, value] of Object.entries(override)) {
+      const baseValue = result[key]
+
+      if (baseValue === undefined) {
+        result[key] = value
+        continue
+      }
+
+      result[key] = deepMerge(baseValue, value)
+    }
+
+    return result as T
   }
 
-  return result as T
+  if (override === undefined || override === null || typeof override !== typeof base) {
+    return base
+  }
+
+  return override as T
 }
 
 export function getDefaultWeddingContent(): WeddingContent {

@@ -52,7 +52,7 @@ export function EventDetails({ ceremony, reception }: EventDetailsProps) {
                 {reception.venue}
               </h4>
               <p className="mt-4 max-w-sm text-base leading-7 text-[#6f655d]">
-                Hemos preparado cada momento con amor, desde nuestro &quot;para siempre&quot; hasta el último brindis.
+                {reception.description}
               </p>
             </section>
           </div>

@@ -23,6 +23,7 @@ export const weddingData: WeddingData = {
     "title": "Recepción",
     "time": "",
     "venue": "Salón Anacaona III",
+    "description": "Hemos preparado cada momento con amor, desde nuestro \"para siempre\" hasta el último brindis.",
     "address": "Renaissance Santo Domingo Jaragua Hotel & Casino, avenida George Washington núm. 367, frente al emblemático Malecón de Santo Domingo.",
     "mapUrl": "https://www.google.com/maps/place/Renaissance+Santo+Domingo+Jaragua+Hotel+%26+Casino/@18.4622715,-69.9024036,1041m/data=!3m1!1e3!4m9!3m8!1s0x8eaf8829a31364e5:0xabe5b14bcd1f354b!5m2!4m1!1i2!8m2!3d18.4622715!4d-69.8998287!16s%2Fm%2F0myxpqq?entry=ttu&g_ep=EgoyMDI2MDYxMC4wIKXMDSoASAFQAw%3D%3D",
     "note": ""

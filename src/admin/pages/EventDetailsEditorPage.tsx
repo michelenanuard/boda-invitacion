@@ -7,10 +7,12 @@ function EventFields({
   title,
   event,
   onChange,
+  showDescription = false,
 }: {
   title: string
   event: WeddingEvent
   onChange: (event: WeddingEvent) => void
+  showDescription?: boolean
 }) {
   return (
     <EditableCard title={title}>
@@ -22,6 +24,16 @@ function EventFields({
         <div className="md:col-span-2">
           <FormField label="Dirección" value={event.address} onChange={(value) => onChange({ ...event, address: value })} />
         </div>
+        {showDescription ? (
+          <div className="md:col-span-2">
+            <FormField
+              label="Texto de la recepción"
+              type="textarea"
+              value={event.description ?? ''}
+              onChange={(value) => onChange({ ...event, description: value })}
+            />
+          </div>
+        ) : null}
         <div className="md:col-span-2">
           <FormField label="Nota para invitados" type="textarea" value={event.note ?? ''} onChange={(value) => onChange({ ...event, note: value })} />
         </div>
@@ -36,7 +48,12 @@ export function EventDetailsEditorPage() {
   return (
     <div className="grid gap-6">
       <EventFields title="Ceremonia" event={draft.ceremony} onChange={(ceremony) => updateDraft({ ...draft, ceremony })} />
-      <EventFields title="Recepción" event={draft.reception} onChange={(reception) => updateDraft({ ...draft, reception })} />
+      <EventFields
+        title="Recepción"
+        event={draft.reception}
+        showDescription
+        onChange={(reception) => updateDraft({ ...draft, reception })}
+      />
     </div>
   )
 }

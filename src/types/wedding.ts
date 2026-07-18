@@ -19,6 +19,7 @@ export type WeddingEvent = {
   venue: string
   address: string
   mapUrl: string
+  description?: string
   note?: string
 }
 
