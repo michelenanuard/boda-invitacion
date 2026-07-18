@@ -13,6 +13,11 @@ const quickLinks = [
   { href: '#rsvp', label: 'RSVP' },
 ]
 
+function getWhatsAppUrl(phone: string) {
+  const normalizedPhone = phone.replace(/\D/g, '')
+  return `https://wa.me/${normalizedPhone}`
+}
+
 export function Footer({ data }: FooterProps) {
   return (
     <footer className="relative overflow-hidden border-t border-[#b88a43]/18 bg-[#211b17] px-4 py-14 text-center text-[#fbf6ec] sm:px-6 sm:py-16 md:px-8 md:py-20 md:text-left">
@@ -48,7 +53,13 @@ export function Footer({ data }: FooterProps) {
             </p>
             <p className="flex min-w-0 items-center justify-center gap-3 md:justify-start">
               <Phone size={17} aria-hidden="true" />
-              <a className="inline-flex min-h-11 items-center transition hover:text-white" href={`tel:${data.contact.phone}`}>
+              <a
+                className="inline-flex min-h-11 items-center transition hover:text-white"
+                href={getWhatsAppUrl(data.contact.phone)}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`Contactar por WhatsApp al ${data.contact.phone}`}
+              >
                 {data.contact.phone}
               </a>
             </p>
