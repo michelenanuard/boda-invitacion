@@ -17,7 +17,10 @@ export function useWeddingContent() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const refreshContent = () => setContent(getWeddingContent())
+    const refreshContent = (event?: Event) => {
+      const updatedContent = event instanceof CustomEvent ? event.detail as WeddingContent | undefined : undefined
+      setContent(updatedContent ?? getWeddingContent())
+    }
 
     const handleStorage = (event: StorageEvent) => {
       if (event.key === WEDDING_CONTENT_STORAGE_KEY) {

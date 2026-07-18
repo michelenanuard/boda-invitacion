@@ -1,5 +1,7 @@
-const MAX_IMAGE_DIMENSION = 1600
-const IMAGE_QUALITY = 0.82
+const MAX_IMAGE_DIMENSION = 1400
+const IMAGE_QUALITY = 0.78
+const MAX_SOURCE_FILE_SIZE = 12 * 1024 * 1024
+const MAX_STORED_IMAGE_SIZE = 900 * 1024
 
 function readImage(file: File) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
@@ -30,6 +32,10 @@ function getScaledSize(width: number, height: number) {
 }
 
 export async function prepareImageForStorage(file: File) {
+  if (file.size > MAX_SOURCE_FILE_SIZE) {
+    throw new Error('La imagen supera el límite de 12 MB. Selecciona una imagen más liviana.')
+  }
+
   const image = await readImage(file)
   const { width, height } = getScaledSize(image.naturalWidth, image.naturalHeight)
   const canvas = document.createElement('canvas')
@@ -45,5 +51,11 @@ export async function prepareImageForStorage(file: File) {
   context.fillRect(0, 0, width, height)
   context.drawImage(image, 0, 0, width, height)
 
-  return canvas.toDataURL('image/jpeg', IMAGE_QUALITY)
+  const result = canvas.toDataURL('image/jpeg', IMAGE_QUALITY)
+
+  if (result.length > MAX_STORED_IMAGE_SIZE) {
+    throw new Error('La imagen procesada sigue siendo demasiado pesada. Usa una imagen de menor resolución.')
+  }
+
+  return result
 }

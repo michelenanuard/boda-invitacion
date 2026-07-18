@@ -3,7 +3,7 @@ import type { WeddingContent } from '../../types/wedding'
 
 export type AdminEditorContext = {
   draft: WeddingContent
-  updateDraft: (content: WeddingContent) => void
+  updateDraft: (update: WeddingContent | ((current: WeddingContent) => WeddingContent)) => void
   saveDraft: () => Promise<void>
   pageTitle: string
   isDirty: boolean

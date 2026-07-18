@@ -92,10 +92,10 @@ export function AdminApp() {
     }
   }
 
-  const updateDraft = (nextDraft: WeddingContent) => {
+  const updateDraft = (update: WeddingContent | ((current: WeddingContent) => WeddingContent)) => {
     setSaveError('')
     setHasLocalEdits(true)
-    setDraft(nextDraft)
+    setDraft((current) => typeof update === 'function' ? update(current) : update)
   }
 
   const logout = () => {

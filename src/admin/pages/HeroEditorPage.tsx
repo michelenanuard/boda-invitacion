@@ -11,7 +11,11 @@ export function HeroEditorPage() {
     <EditableCard title="Portada" description="Esta es la primera impresión que verán los invitados.">
       <div className="grid gap-5 lg:grid-cols-2">
         <FormField label="Título principal" value={draft.heroTitle} onChange={(heroTitle) => updateDraft({ ...draft, heroTitle })} />
-        <ImagePickerField label="Foto de portada" value={draft.heroImage} onChange={(heroImage) => updateDraft({ ...draft, heroImage })} />
+        <ImagePickerField
+          label="Foto de portada"
+          value={draft.heroImage}
+          onChange={(heroImage) => updateDraft((current) => ({ ...current, heroImage }))}
+        />
         <div className="lg:col-span-2">
           <TextEditorField
             label="Mensaje principal"

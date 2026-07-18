@@ -15,18 +15,6 @@ const createGalleryImage = (): GalleryImage => ({
 export function GalleryEditorPage() {
   const { draft, updateDraft } = useAdminEditor()
 
-  const uploadVideo = (file: File) => {
-    const reader = new FileReader()
-
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        updateDraft({ ...draft, galleryVideo: { ...draft.galleryVideo, src: reader.result } })
-      }
-    }
-
-    reader.readAsDataURL(file)
-  }
-
   return (
     <div className="grid gap-6">
       <EditableCard title="Video central" description="Este video aparece en el centro de la sección Momentos para recordar.">
@@ -40,23 +28,11 @@ export function GalleryEditorPage() {
               onChange={(src) => updateDraft({ ...draft, galleryVideo: { ...draft.galleryVideo, src } })}
               helperText="Pega un enlace compartido de Google Drive, una URL MP4 o sube un archivo desde este equipo."
             />
-            <label className="mt-3 inline-flex min-h-10 cursor-pointer items-center justify-center rounded-full border border-[#b88a43]/35 bg-[#fffdf8] px-4 text-sm font-bold text-[#211b17]">
-              Subir video
-              <input
-                className="hidden"
-                type="file"
-                accept="video/*"
-                onChange={(event) => {
-                  const file = event.target.files?.[0]
-                  if (file) uploadVideo(file)
-                }}
-              />
-            </label>
             <p className="mt-2 text-xs leading-5 text-stone-500">
-              En esta versión se guarda en el navegador; videos grandes pueden ocupar demasiado espacio.
+              Por estabilidad, utiliza un enlace compartido o una URL MP4. Los videos no se almacenan dentro del contenido de la invitación.
             </p>
           </div>
-          <ImagePickerField label="Imagen de portada del video" value={draft.galleryVideo.poster} onChange={(poster) => updateDraft({ ...draft, galleryVideo: { ...draft.galleryVideo, poster } })} />
+          <ImagePickerField label="Imagen de portada del video" value={draft.galleryVideo.poster} onChange={(poster) => updateDraft((current) => ({ ...current, galleryVideo: { ...current.galleryVideo, poster } }))} />
           <FormField label="Texto del video" type="textarea" value={draft.galleryVideo.caption} onChange={(caption) => updateDraft({ ...draft, galleryVideo: { ...draft.galleryVideo, caption } })} />
         </div>
       </EditableCard>
@@ -73,7 +49,14 @@ export function GalleryEditorPage() {
               <FormField label="Título visible" value={item.caption} onChange={(caption) => updateItem({ ...item, caption })} />
               <FormField label="Descripción accesible" value={item.alt} onChange={(alt) => updateItem({ ...item, alt })} />
               <div className="lg:col-span-2">
-                <ImagePickerField label="Imagen" value={item.src} onChange={(src) => updateItem({ ...item, src })} />
+                <ImagePickerField
+                  label="Imagen"
+                  value={item.src}
+                  onChange={(src) => updateDraft((current) => ({
+                    ...current,
+                    gallery: current.gallery.map((image) => image.id === item.id ? { ...image, src } : image),
+                  }))}
+                />
               </div>
             </div>
           )}

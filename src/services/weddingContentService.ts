@@ -29,8 +29,35 @@ function cloneContent(content: WeddingContent): WeddingContent {
   return JSON.parse(JSON.stringify(content)) as WeddingContent
 }
 
+function stableStringify(value: unknown): string {
+  if (Array.isArray(value)) {
+    return `[${value.map(stableStringify).join(',')}]`
+  }
+
+  if (isRecord(value)) {
+    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`).join(',')}}`
+  }
+
+  return JSON.stringify(value)
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
+}
+
+function deepMerge<T>(base: T, override: unknown): T {
+  if (!isRecord(base) || !isRecord(override)) {
+    return (override === undefined ? base : override) as T
+  }
+
+  const result: Record<string, unknown> = { ...base }
+
+  for (const [key, value] of Object.entries(override)) {
+    const baseValue = result[key]
+    result[key] = isRecord(baseValue) && isRecord(value) ? deepMerge(baseValue, value) : value
+  }
+
+  return result as T
 }
 
 export function getDefaultWeddingContent(): WeddingContent {
@@ -42,10 +69,7 @@ function normalizeWeddingContent(content: unknown): WeddingContent {
     return getDefaultWeddingContent()
   }
 
-  return {
-    ...getDefaultWeddingContent(),
-    ...content,
-  } as WeddingContent
+  return deepMerge(getDefaultWeddingContent(), content)
 }
 
 function createRealtimeChannelName(baseName: string) {
@@ -137,10 +161,7 @@ export function getWeddingContent(): WeddingContent {
       return getDefaultWeddingContent()
     }
 
-    return {
-      ...getDefaultWeddingContent(),
-      ...parsedContent,
-    } as WeddingContent
+    return deepMerge(getDefaultWeddingContent(), parsedContent)
   } catch {
     return getDefaultWeddingContent()
   }
@@ -197,11 +218,26 @@ export function saveWeddingContent(content: WeddingContent) {
   }
 }
 
+function cacheWeddingContentBestEffort(content: WeddingContent) {
+  try {
+    window.localStorage.setItem(WEDDING_CONTENT_STORAGE_KEY, JSON.stringify(content))
+    window.localStorage.setItem(WEDDING_CONTENT_BASE_SIGNATURE_KEY, getBaseContentSignature())
+  } catch (error) {
+    if (isQuotaExceededError(error)) {
+      window.localStorage.removeItem(WEDDING_CONTENT_STORAGE_KEY)
+      logWeddingContent('Cache local omitido por falta de espacio; Supabase conserva el contenido.')
+      return
+    }
+
+    throw error
+  }
+}
+
 export async function savePublishedWeddingContent(content: WeddingContent): Promise<PublishedWeddingContent> {
   const normalizedContent = normalizeWeddingContent(content)
-  saveWeddingContent(normalizedContent)
 
   if (!isSupabaseConfigured || !supabase) {
+    saveWeddingContent(normalizedContent)
     logWeddingContent('Contenido guardado en fallback localStorage')
     return {
       content: normalizedContent,
@@ -226,11 +262,18 @@ export async function savePublishedWeddingContent(content: WeddingContent): Prom
   }
 
   const row = data as SiteContentRow
+  const savedContent = normalizeWeddingContent(row.content)
+
+  if (stableStringify(savedContent) !== stableStringify(normalizedContent)) {
+    throw new Error('Supabase respondió, pero el contenido guardado no coincide con los cambios enviados. Intenta nuevamente.')
+  }
+
   const publishedContent = {
-    content: normalizeWeddingContent(row.content),
+    content: savedContent,
     updatedAt: row.updated_at,
   }
 
+  cacheWeddingContentBestEffort(publishedContent.content)
   window.dispatchEvent(new CustomEvent(WEDDING_CONTENT_UPDATED_EVENT, { detail: publishedContent.content }))
   logWeddingContent('Contenido publicado guardado', { updatedAt: publishedContent.updatedAt })
   return publishedContent
@@ -289,10 +332,7 @@ export function importWeddingContent(json: string) {
     throw new Error('El archivo no parece ser un respaldo válido de la invitación.')
   }
 
-  saveWeddingContent({
-    ...getDefaultWeddingContent(),
-    ...parsedContent,
-  })
+  saveWeddingContent(deepMerge(getDefaultWeddingContent(), parsedContent))
 }
 
 export function hasCustomContent() {
