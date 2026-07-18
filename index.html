@@ -16,7 +16,15 @@
       <input type="number" name="guests" />
       <textarea name="message"></textarea>
     </form>
-    <div id="root"></div>
+    <div id="root">
+      <div class="app-loading" role="status" aria-live="polite">
+        <div class="app-loading__monogram">A <span>&amp;</span> M</div>
+        <p>Preparando la invitación…</p>
+      </div>
+    </div>
+    <style>
+      .app-loading{min-height:100vh;display:grid;place-content:center;justify-items:center;gap:18px;background:#fbf6ec;color:#211b17;font-family:Georgia,serif;text-align:center}.app-loading__monogram{display:grid;place-items:center;width:72px;height:72px;border:1px solid rgba(184,138,67,.45);color:#b88a43;font-size:20px}.app-loading__monogram span{font-size:13px;line-height:0}.app-loading p{margin:0;color:#6f655d;font-size:16px}
+    </style>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

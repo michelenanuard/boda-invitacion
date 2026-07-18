@@ -72,8 +72,7 @@ function ProtectedAdminRoute() {
 }
 
 function App() {
-  const { content } = useWeddingContent()
-  const { settings, loading: loadingSiteSettings } = useSiteSettings(content.liveMessagesEnabled === true)
+  const { settings, loading: loadingSiteSettings } = useSiteSettings(false)
 
   return (
     <Routes>
