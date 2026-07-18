@@ -31,7 +31,7 @@ function validate(values: FormValues) {
   }
 
   if (!emailPattern.test(values.email.trim())) {
-    errors.email = 'Escribe un email válido.'
+    errors.email = 'Escribe un correo electrónico válido.'
   }
 
   if (!values.attending) {
@@ -63,7 +63,7 @@ function createWhatsAppMessage(values: FormValues, content: RSVPContent, coupleD
     '',
     `Nombre: ${values.name.trim()}`,
     values.phone.trim() ? `Telefono: ${values.phone.trim()}` : '',
-    `Email: ${values.email.trim()}`,
+    `Correo electrónico: ${values.email.trim()}`,
     `Asistencia: ${getAttendanceLabel(values.attending, content)}`,
     `Cantidad de invitados: ${values.guests.trim()}`,
     values.message.trim() ? `Mensaje: ${values.message.trim()}` : '',
@@ -110,7 +110,7 @@ export function RSVPForm({ content, contactPhone, coupleDisplayName }: RSVPFormP
 
     if (!whatsAppPhone) {
       setSubmitted(false)
-      setSubmitError('No pudimos abrir WhatsApp porque falta el numero de contacto.')
+      setSubmitError('No pudimos abrir WhatsApp porque falta el número de contacto.')
       return
     }
 
@@ -217,7 +217,7 @@ export function RSVPForm({ content, contactPhone, coupleDisplayName }: RSVPFormP
             <label className="block min-w-0 sm:col-span-2">
               <span className="mb-2 flex items-center gap-2 text-sm font-semibold text-[#394136]">
                 <Mail className="h-4 w-4 text-[#b88a43]" aria-hidden="true" />
-                Email
+                Correo electrónico
               </span>
               <input
                 name="email"

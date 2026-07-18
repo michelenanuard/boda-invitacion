@@ -11,8 +11,8 @@ export function Testimonials({ testimonials }: TestimonialsProps) {
     <section id="mensajes" className="section-shell">
       <SectionTitle
         eyebrow="Mensajes"
-        title="Palabras de quienes nos acompañan"
-        description="Tres voces cercanas para celebrar el amor, la familia y la alegría compartida."
+        title="Palabras que atesoraremos por siempre"
+        description="Con el amor de nuestras familias, compartimos unas palabras que atesoraremos por siempre."
       />
 
       <div className="grid gap-6 md:grid-cols-3">

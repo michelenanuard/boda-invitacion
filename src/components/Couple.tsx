@@ -38,9 +38,9 @@ export function Couple({ bride, groom }: CoupleProps) {
   return (
     <section id="pareja" className="section-shell">
       <SectionTitle
-        eyebrow="La pareja"
-        title="Dos historias, un mismo destino"
-        description="Una mirada cercana a quienes celebran este nuevo comienzo."
+        eyebrow="Los novios"
+        title="Dos corazones, una misma promesa"
+        description="Con la bendición de Dios y el amor de nuestras familias, damos el paso más importante de nuestras vidas."
       />
 
       <div className="grid gap-6 md:grid-cols-2 lg:gap-8">

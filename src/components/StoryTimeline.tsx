@@ -12,7 +12,7 @@ export function StoryTimeline({ story }: StoryTimelineProps) {
         <SectionTitle
           eyebrow="Nuestra historia"
           title="Momentos que nos trajeron hasta aquí"
-          description="Un recorrido por los capítulos que hicieron crecer esta historia hasta el día que celebraremos juntos."
+          description="Un recorrido por los momentos que, paso a paso, nos condujeron hasta el día en que uniremos nuestras vidas."
         />
 
         <div className="relative mx-auto max-w-4xl">

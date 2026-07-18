@@ -83,6 +83,16 @@ export type RSVPContent = {
   attendanceOptions: RSVPOption[]
 }
 
+export type WeddingGifts = {
+  message: string
+  bank: string
+  accountType: string
+  accountNumber: string
+  accountHolders: string
+  accountHolderId: string
+  registryUrl: string
+}
+
 export type WeddingData = {
   brideName: string
   groomName: string
@@ -104,6 +114,7 @@ export type WeddingData = {
   testimonials: Testimonial[]
   faq: FAQItem[]
   rsvp: RSVPContent
+  gifts: WeddingGifts
   liveMessagesEnabled?: boolean
   contact: WeddingContact
   socialLinks: SocialLink[]

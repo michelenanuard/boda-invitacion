@@ -7,6 +7,7 @@ import { EventDetails } from './components/EventDetails'
 import { FAQ } from './components/FAQ'
 import { Footer } from './components/Footer'
 import { Gallery } from './components/Gallery'
+import { WeddingGifts } from './components/WeddingGifts'
 import { Header } from './components/Header'
 import { Hero } from './components/Hero'
 import { RSVPForm } from './components/RSVPForm'
@@ -40,6 +41,7 @@ function InvitationPage({ liveMessagesEnabled }: { liveMessagesEnabled: boolean 
       />
       <main>
         <Hero data={content} />
+        <WeddingGifts gifts={content.gifts} />
         <EventDetails ceremony={content.ceremony} reception={content.reception} />
         <Countdown
           weddingDate={content.weddingDate}

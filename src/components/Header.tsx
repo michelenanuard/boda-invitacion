@@ -11,6 +11,7 @@ interface HeaderProps {
 
 const leftNavItems = [
   { label: 'Inicio', href: '#inicio' },
+  { label: 'Regalos de Boda', href: '#regalos' },
   { label: 'Historia', href: '#historia' },
   { label: 'Galería', href: '#galeria' },
 ]
